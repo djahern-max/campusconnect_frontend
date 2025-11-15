@@ -22,38 +22,38 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary-600">CampusConnect</span>
+            <span className="text-2xl font-bold text-gray-900">CampusConnect</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/institutions" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/institutions" className="text-gray-700 hover:text-gray-900 transition font-medium">
               Institutions
             </Link>
-            <Link href="/scholarships" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/scholarships" className="text-gray-700 hover:text-gray-900 transition font-medium">
               Scholarships
             </Link>
 
             {isAuthenticated ? (
               <>
                 {/* All Admins */}
-                <Link href="/admin/dashboard" className="text-gray-700 hover:text-primary-600 transition">
+                <Link href="/admin/dashboard" className="text-gray-700 hover:text-gray-900 transition font-medium">
                   Dashboard
                 </Link>
 
                 {/* SUPER ADMIN ONLY */}
                 {isSuperAdmin && (
                   <>
-                    <Link href="/admin/outreach" className="text-gray-700 hover:text-primary-600 transition">
+                    <Link href="/admin/outreach" className="text-gray-700 hover:text-gray-900 transition font-medium">
                       Outreach
                     </Link>
-                    <Link href="/admin/invitations" className="text-gray-700 hover:text-primary-600 transition">
+                    <Link href="/admin/invitations" className="text-gray-700 hover:text-gray-900 transition font-medium">
                       Invitations
                     </Link>
                   </>
                 )}
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-gray-200">
                   <span className="text-sm text-gray-600">{user?.email}</span>
                   <Button variant="ghost" size="sm" onClick={logout}>
                     Logout
@@ -62,13 +62,9 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/admin/register">
-                  <Button variant="secondary" size="sm">
-                    Get Started
-                  </Button>
-                </Link>
+                {/* Only show Admin Login for non-authenticated users */}
                 <Link href="/admin/login">
-                  <Button variant="primary" size="sm">
+                  <Button variant="primary" size="sm" className="bg-gray-900 hover:bg-gray-800">
                     Admin Login
                   </Button>
                 </Link>
@@ -80,6 +76,7 @@ export function Navbar() {
           <button
             className="md:hidden p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -92,14 +89,14 @@ export function Navbar() {
           <div className="px-4 py-4 space-y-3">
             <Link
               href="/institutions"
-              className="block text-gray-700 hover:text-primary-600 transition py-2"
+              className="block text-gray-700 hover:text-gray-900 transition py-2 font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Institutions
             </Link>
             <Link
               href="/scholarships"
-              className="block text-gray-700 hover:text-primary-600 transition py-2"
+              className="block text-gray-700 hover:text-gray-900 transition py-2 font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Scholarships
@@ -109,7 +106,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/admin/dashboard"
-                  className="block text-gray-700 hover:text-primary-600 transition py-2"
+                  className="block text-gray-700 hover:text-gray-900 transition py-2 font-medium"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Dashboard
@@ -120,14 +117,14 @@ export function Navbar() {
                   <>
                     <Link
                       href="/admin/outreach"
-                      className="block text-gray-700 hover:text-primary-600 transition py-2"
+                      className="block text-gray-700 hover:text-gray-900 transition py-2 font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Outreach
                     </Link>
                     <Link
                       href="/admin/invitations"
-                      className="block text-gray-700 hover:text-primary-600 transition py-2"
+                      className="block text-gray-700 hover:text-gray-900 transition py-2 font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Invitations
@@ -144,13 +141,9 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/admin/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="sm" className="w-full">
-                    Get Started
-                  </Button>
-                </Link>
+                {/* Only show Admin Login for non-authenticated users */}
                 <Link href="/admin/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="primary" size="sm" className="w-full">
+                  <Button variant="primary" size="sm" className="w-full bg-gray-900 hover:bg-gray-800">
                     Admin Login
                   </Button>
                 </Link>

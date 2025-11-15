@@ -1,4 +1,4 @@
-//src/app/admin/login/page.tsx
+// src/app/admin/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -28,17 +28,13 @@ export default function AdminLoginPage() {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
+      if (!response.ok) throw new Error('Login failed');
 
       const data = await response.json();
       const { access_token } = data;
 
-      // Store token
       localStorage.setItem('auth_token', access_token);
 
-      // Fetch current user info
       const userResponse = await fetch('http://localhost:8000/api/v1/admin/auth/me', {
         headers: { Authorization: `Bearer ${access_token}` },
       });
@@ -47,18 +43,12 @@ export default function AdminLoginPage() {
         const userData = await userResponse.json();
         localStorage.setItem('user', JSON.stringify(userData));
 
-        console.log('User data:', userData);
-
-        // Redirect based on role - use router.push for Next.js
         if (userData.role === 'super_admin') {
-          console.log('Redirecting super admin to invitations...');
           router.push('/admin/invitations');
         } else {
-          console.log('Redirecting regular admin to dashboard...');
           router.push('/admin/dashboard');
         }
       } else {
-        // Fallback if can't get user info
         router.push('/admin/dashboard');
       }
     } catch (err) {
@@ -73,6 +63,7 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full">
         <Card>
           <CardBody className="p-8">
+
             {/* Unified header */}
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-1">Admin Login</h1>
@@ -80,6 +71,7 @@ export default function AdminLoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
@@ -89,10 +81,12 @@ export default function AdminLoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoFocus
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg
+                             focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input
@@ -101,31 +95,35 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg
+                             focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
+              {/* Error */}
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                   {error}
                 </div>
               )}
 
+              {/* 🔥 Grey Theme Button */}
               <button
                 type="submit"
                 disabled={isLoading}
                 className="
                   w-full flex items-center justify-center
                   px-4 py-2
-                  bg-blue-600 hover:bg-blue-700
+                  bg-gray-600 hover:bg-gray-700
                   text-white font-medium rounded-lg
                   transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                 "
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? 'Signing in…' : 'Sign In'}
               </button>
             </form>
 
+            {/* Links */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Need an account?{' '}
@@ -143,6 +141,7 @@ export default function AdminLoginPage() {
                 Regular admins: Register at /admin/register with your invitation code
               </p>
             </div>
+
           </CardBody>
         </Card>
       </div>
