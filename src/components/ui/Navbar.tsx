@@ -62,7 +62,7 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/register">
+                <Link href="/admin/register">
                   <Button variant="secondary" size="sm">
                     Get Started
                   </Button>
@@ -144,7 +144,7 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/admin/register" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="secondary" size="sm" className="w-full">
                     Get Started
                   </Button>
