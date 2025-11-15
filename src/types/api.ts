@@ -131,3 +131,97 @@ export interface CheckoutSession {
   session_id: string;
   session_url: string;
 }
+
+export interface AdmissionData {
+  id: number;
+  institution_id: number;
+  ipeds_id: number;
+  academic_year: string;
+  applications_total: number | null;
+  admissions_total: number | null;
+  enrolled_total: number | null;
+  acceptance_rate: number | null;
+  yield_rate: number | null;
+  sat_reading_25th: number | null;
+  sat_reading_50th: number | null;
+  sat_reading_75th: number | null;
+  sat_math_25th: number | null;
+  sat_math_50th: number | null;
+  sat_math_75th: number | null;
+  percent_submitting_sat: number | null;
+  is_admin_verified: boolean;
+  created_at: string;
+}
+
+export interface TuitionData {
+  id: number;
+  institution_id: number;
+  ipeds_id: number;
+  academic_year: string;
+  data_source: string | null;
+  tuition_in_state: number | null;
+  tuition_out_state: number | null;
+  required_fees_in_state: number | null;
+  required_fees_out_state: number | null;
+  room_board_on_campus: number | null;
+  is_admin_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinancialOverview {
+  ipeds_id: number;
+  tuition: TuitionData | null;
+  admissions: AdmissionData | null;
+}
+
+export interface AdmissionDataUpdate {
+  applications_total?: number;
+  admissions_total?: number;
+  enrolled_total?: number;
+  acceptance_rate?: number;
+  yield_rate?: number;
+  sat_reading_25th?: number;
+  sat_reading_50th?: number;
+  sat_reading_75th?: number;
+  sat_math_25th?: number;
+  sat_math_50th?: number;
+  sat_math_75th?: number;
+  percent_submitting_sat?: number;
+  is_admin_verified?: boolean;
+}
+
+export interface TuitionDataUpdate {
+  tuition_in_state?: number;
+  tuition_out_state?: number;
+  required_fees_in_state?: number;
+  required_fees_out_state?: number;
+  room_board_on_campus?: number;
+  data_source?: string;
+  is_admin_verified?: boolean;
+}
+export interface AdmissionDataUpdate {
+  applications_total?: number;
+  admissions_total?: number;
+  enrolled_total?: number;
+  acceptance_rate?: number;
+  yield_rate?: number;
+  sat_reading_25th?: number;
+  sat_reading_50th?: number;
+  sat_reading_75th?: number;
+  sat_math_25th?: number;
+  sat_math_50th?: number;
+  sat_math_75th?: number;
+  percent_submitting_sat?: number;
+  is_admin_verified?: boolean;
+}
+
+export interface TuitionDataUpdate {
+  tuition_in_state?: number;
+  tuition_out_state?: number;
+  required_fees_in_state?: number;
+  required_fees_out_state?: number;
+  room_board_on_campus?: number;
+  data_source?: string;
+  is_admin_verified?: boolean;
+}

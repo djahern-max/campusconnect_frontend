@@ -1,21 +1,38 @@
 'use client';
 
 import { useInstitution } from '@/hooks/useInstitutions';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Users, ExternalLink, ArrowLeft } from 'lucide-react';
 import { use } from 'react';
+import FinancialOverview from '@/components/public/FinancialOverview';
+import { FinancialOverview as FinancialOverviewType } from '@/types/api';
+import { institutionsApi } from '@/api/endpoints/institutions';
 
-export default function InstitutionDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ ipeds_id: string }> 
+export default function InstitutionDetailPage({
+  params
+}: {
+  params: Promise<{ ipeds_id: string }>
 }) {
   const resolvedParams = use(params);
   const ipeds_id = parseInt(resolvedParams.ipeds_id);
   const { data: institution, isLoading, error } = useInstitution(ipeds_id);
+  const [financialData, setFinancialData] = useState<FinancialOverviewType | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const financial = await institutionsApi.getFinancialOverview(ipeds_id);
+        setFinancialData(financial);
+      } catch (error) {
+        console.log('No financial data available');
+      }
+    }
+    fetchData();
+  }, [ipeds_id]);
 
   if (isLoading) {
     return (
@@ -70,13 +87,13 @@ export default function InstitutionDetailPage({
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             {institution.name}
           </h1>
-          
+
           <div className="flex flex-wrap gap-4 text-gray-600">
             <div className="flex items-center">
               <MapPin className="h-5 w-5 mr-2" />
               {institution.city}, {institution.state}
             </div>
-            
+
             {institution.student_faculty_ratio && (
               <div className="flex items-center">
                 <Users className="h-5 w-5 mr-2" />
@@ -86,11 +103,10 @@ export default function InstitutionDetailPage({
           </div>
 
           <div className="mt-4">
-            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-              institution.control_type === 'PUBLIC' 
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-purple-100 text-purple-800'
-            }`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${institution.control_type === 'PUBLIC'
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-purple-100 text-purple-800'
+              }`}>
               {institution.control_type.replace('_', ' ')}
             </span>
           </div>
@@ -117,6 +133,9 @@ export default function InstitutionDetailPage({
                 </div>
               </CardBody>
             </Card>
+            {financialData && (
+              <FinancialOverview data={financialData} className="mb-8" />
+            )}
 
             {/* Quick Stats */}
             {institution.student_faculty_ratio && (
@@ -163,7 +182,7 @@ export default function InstitutionDetailPage({
                     <p className="font-medium">{institution.control_type.replace('_', ' ')}</p>
                   </div>
                 </div>
-                
+
                 <Button variant="accent" className="w-full mt-6">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Visit Website
