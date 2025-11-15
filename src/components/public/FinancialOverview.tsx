@@ -1,3 +1,4 @@
+// src/components/public/FinancialOverview.tsx
 import React from 'react';
 import TuitionCard from './TuitionCard';
 import AdmissionsCard from './AdmissionsCard';
@@ -9,32 +10,39 @@ interface FinancialOverviewProps {
 }
 
 export default function FinancialOverview({ data, className = '' }: FinancialOverviewProps) {
-    const { tuition, admissions } = data;
+    const hasTuition = data.tuition !== null;
+    const hasAdmissions = data.admissions !== null;
 
-    // If no data available
-    if (!tuition && !admissions) {
+    if (!hasTuition && !hasAdmissions) {
         return (
-            <div className={`text-center py-12 ${className}`}>
-                <p className="text-gray-500 text-lg">Financial and admissions data not yet available</p>
-                <p className="text-gray-400 text-sm mt-2">Check back soon for updates</p>
+            <div className={`bg-gray-50 rounded-lg p-8 text-center ${className}`}>
+                <p className="text-gray-600">
+                    Financial and admissions data is not currently available for this institution.
+                </p>
             </div>
         );
     }
 
     return (
         <div className={className}>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Financial & Admissions Overview</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {tuition && <TuitionCard tuition={tuition} />}
-                {admissions && <AdmissionsCard admissions={admissions} />}
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Tuition & Admissions
+                </h2>
+                <p className="text-gray-600">
+                    View current costs and admissions statistics for this institution.
+                </p>
             </div>
 
-            {/* Note about data */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {data.tuition !== null && <TuitionCard tuition={data.tuition} />}
+                {data.admissions !== null && <AdmissionsCard admissions={data.admissions} />}
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                    <strong>Note:</strong> This data is sourced from official records and may be verified by the institution.
-                    Financial aid and scholarships may significantly reduce the actual cost of attendance.
+                    <strong>Note:</strong> These costs represent published tuition rates. Most students receive financial aid.
+                    Contact the institution's financial aid office to learn about scholarships and aid opportunities.
                 </p>
             </div>
         </div>

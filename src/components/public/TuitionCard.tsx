@@ -1,5 +1,5 @@
+// src/components/public/TuitionCard.tsx
 import React from 'react';
-import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { TuitionData } from '@/types/api';
 
@@ -28,7 +28,7 @@ export default function TuitionCard({ tuition, className = '' }: TuitionCardProp
     const outStateTotal = calculateTotal(tuition.tuition_out_state, tuition.required_fees_out_state);
 
     return (
-        <Card className={className}>
+        <div className={`bg-white rounded-lg shadow-md border border-gray-200 p-6 ${className}`}>
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h3 className="text-xl font-semibold text-gray-900">
@@ -126,6 +126,6 @@ export default function TuitionCard({ tuition, className = '' }: TuitionCardProp
                     </div>
                 )}
             </div>
-        </Card>
+        </div>
     );
 }

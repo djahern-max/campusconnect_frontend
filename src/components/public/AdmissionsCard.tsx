@@ -1,5 +1,5 @@
+// src/components/public/AdmissionsCard.tsx
 import React from 'react';
-import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import StatCard from '@/components/ui/StatCard';
 import { AdmissionData } from '@/types/api';
@@ -23,7 +23,7 @@ export default function AdmissionsCard({ admissions, className = '' }: Admission
     const hasSATData = admissions.sat_reading_50th || admissions.sat_math_50th;
 
     return (
-        <Card className={className}>
+        <div className={`bg-white rounded-lg shadow-md border border-gray-200 p-6 ${className}`}>
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h3 className="text-xl font-semibold text-gray-900">
@@ -119,6 +119,6 @@ export default function AdmissionsCard({ admissions, className = '' }: Admission
                     </div>
                 )}
             </div>
-        </Card>
+        </div>
     );
 }

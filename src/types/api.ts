@@ -225,3 +225,29 @@ export interface TuitionDataUpdate {
   data_source?: string;
   is_admin_verified?: boolean;
 }
+
+export interface Scholarship {
+  id: number;
+  title: string;
+  organization: string;
+  scholarship_type: string;
+  status: string;
+  difficulty_level: string;
+  amount_min: number;
+  amount_max: number;
+  is_renewable: boolean;
+  number_of_awards: number | null;
+  deadline: string | null;
+  application_opens: string | null;
+  for_academic_year: string | null;
+  description: string | null;
+  website_url: string | null;
+  min_gpa: number | null;
+  primary_image_url: string | null;
+  verified: boolean;
+  featured: boolean;
+  views_count: number;
+  applications_count: number;
+  created_at: string;
+  updated_at: string | null;
+}

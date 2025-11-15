@@ -1,6 +1,6 @@
+// src/components/admin/TuitionDataTable.tsx
 import React from 'react';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
 import { TuitionData } from '@/types/api';
 
 interface TuitionDataTableProps {
@@ -91,20 +91,19 @@ export default function TuitionDataTable({
                                 )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Button
+                                <button
                                     onClick={() => onEdit(tuition)}
-                                    className="mr-2"
-                                    variant="outline"
+                                    className="mr-2 px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                 >
                                     Edit
-                                </Button>
+                                </button>
                                 {!tuition.is_admin_verified && (
-                                    <Button
+                                    <button
                                         onClick={() => onVerify(tuition.id)}
-                                        variant="primary"
+                                        className="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
                                         Verify
-                                    </Button>
+                                    </button>
                                 )}
                             </td>
                         </tr>

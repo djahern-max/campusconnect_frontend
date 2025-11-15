@@ -114,7 +114,7 @@ export default function InstitutionsPage() {
             <div className="mb-4 text-gray-600">
               Showing {filteredInstitutions.length} institution{filteredInstitutions.length !== 1 ? 's' : ''}
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredInstitutions.map((institution) => (
                 <Link
@@ -130,34 +130,34 @@ export default function InstitutionsPage() {
                           alt={institution.name}
                           fill
                           className="object-cover rounded-t-lg"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </div>
                     )}
-                    
+
                     <CardBody>
                       <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
                         {institution.name}
                       </h3>
-                      
+
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-2 text-gray-400" />
                           {institution.city}, {institution.state}
                         </div>
-                        
+
                         {institution.student_faculty_ratio && (
                           <div className="flex items-center">
                             <Users className="h-4 w-4 mr-2 text-gray-400" />
                             {institution.student_faculty_ratio}:1 student-faculty ratio
                           </div>
                         )}
-                        
+
                         <div className="mt-3">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            institution.control_type === 'PUBLIC' 
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-purple-100 text-purple-800'
-                          }`}>
+                            }`}>
                             {institution.control_type.replace('_', ' ')}
                           </span>
                         </div>

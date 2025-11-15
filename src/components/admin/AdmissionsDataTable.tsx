@@ -1,124 +1,124 @@
+// src/components/admin/TuitionDataTable.tsx
 import React from 'react';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import { TuitionData } from '@/types/api';
+import StatCard from '@/components/ui/StatCard';
+import { AdmissionData } from '@/types/api';
 
-interface TuitionDataTableProps {
-    data: TuitionData[];
-    onEdit: (tuition: TuitionData) => void;
-    onVerify: (id: number) => void;
+interface AdmissionsCardProps {
+    admissions: AdmissionData;
     className?: string;
 }
 
-export default function TuitionDataTable({
-    data,
-    onEdit,
-    onVerify,
-    className = ''
-}: TuitionDataTableProps) {
-    const formatCurrency = (amount: number | null) => {
-        if (!amount) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-        }).format(amount);
+export default function AdmissionsCard({ admissions, className = '' }: AdmissionsCardProps) {
+    const formatNumber = (num: number | null) => {
+        if (!num) return 'N/A';
+        return num.toLocaleString('en-US');
     };
 
-    if (data.length === 0) {
-        return (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No tuition data available</p>
-            </div>
-        );
-    }
+    const formatPercentage = (num: number | null) => {
+        if (!num) return 'N/A';
+        return `${num}%`;
+    };
+
+    const hasSATData = admissions.sat_reading_50th || admissions.sat_math_50th;
 
     return (
-        <div className={`overflow-x-auto ${className}`}>
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Academic Year
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            In-State
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Out-of-State
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Room & Board
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                    {data.map((tuition) => (
-                        <tr key={tuition.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {tuition.academic_year}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatCurrency(tuition.tuition_in_state)}
-                                {tuition.required_fees_in_state && (
-                                    <div className="text-xs text-gray-500">
-                                        + {formatCurrency(tuition.required_fees_in_state)} fees
-                                    </div>
-                                )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatCurrency(tuition.tuition_out_state)}
-                                {tuition.required_fees_out_state && (
-                                    <div className="text-xs text-gray-500">
-                                        + {formatCurrency(tuition.required_fees_out_state)} fees
-                                    </div>
-                                )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatCurrency(tuition.room_board_on_campus)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                {tuition.is_admin_verified ? (
-                                    <Badge variant="success">Verified</Badge>
-                                ) : (
-                                    <Badge variant="warning">Unverified</Badge>
-                                )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Button
-                                    onClick={() => onEdit(tuition)}
-                                    className="mr-2"
-                                    variant="outline"
-                                >
-                                    Edit
-                                </Button>
-                                {!tuition.is_admin_verified && (
-                                    <Button
-                                        onClick={() => onVerify(tuition.id)}
-                                        variant="primary"
-                                    >
-                                        Verify
-                                    </Button>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {data.length > 0 && (
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-sm text-gray-500">
-                        Showing {data.length} record{data.length !== 1 ? 's' : ''}
+        <div className={`bg-white rounded-lg shadow-md border border-gray-200 p-6 ${className}`}>
+            <div className="flex justify-between items-start mb-6">
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        Admissions Statistics
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Academic Year {admissions.academic_year}
                     </p>
                 </div>
-            )}
+                {admissions.is_admin_verified && (
+                    <Badge variant="success">✓ Verified</Badge>
+                )}
+            </div>
+
+            <div className="space-y-6">
+                {/* Key Metrics */}
+                <div className="grid grid-cols-3 gap-4">
+                    <StatCard
+                        label="Acceptance Rate"
+                        value={formatPercentage(admissions.acceptance_rate)}
+                        className="text-center"
+                    />
+                    <StatCard
+                        label="Applications"
+                        value={formatNumber(admissions.applications_total)}
+                        className="text-center"
+                    />
+                    <StatCard
+                        label="Enrolled"
+                        value={formatNumber(admissions.enrolled_total)}
+                        className="text-center"
+                    />
+                </div>
+
+                {/* Detailed Stats */}
+                {admissions.admissions_total && (
+                    <div className="pt-4 border-t border-gray-200">
+                        <div className="flex justify-between items-baseline">
+                            <span className="text-sm text-gray-600">Students Admitted</span>
+                            <span className="text-lg font-semibold text-gray-900">
+                                {formatNumber(admissions.admissions_total)}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {admissions.yield_rate && (
+                    <div className="flex justify-between items-baseline">
+                        <span className="text-sm text-gray-600">Yield Rate</span>
+                        <span className="text-lg font-semibold text-gray-900">
+                            {formatPercentage(admissions.yield_rate)}
+                        </span>
+                    </div>
+                )}
+
+                {/* SAT Scores */}
+                {hasSATData && (
+                    <div className="pt-4 border-t border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                            SAT Score Ranges (25th-75th percentile)
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            {admissions.sat_reading_50th && (
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Evidence-Based Reading</p>
+                                    <div className="flex items-baseline space-x-1">
+                                        <span className="text-sm text-gray-600">{admissions.sat_reading_25th}</span>
+                                        <span className="text-xs text-gray-400">-</span>
+                                        <span className="text-lg font-bold text-gray-900">{admissions.sat_reading_50th}</span>
+                                        <span className="text-xs text-gray-400">-</span>
+                                        <span className="text-sm text-gray-600">{admissions.sat_reading_75th}</span>
+                                    </div>
+                                </div>
+                            )}
+                            {admissions.sat_math_50th && (
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Math</p>
+                                    <div className="flex items-baseline space-x-1">
+                                        <span className="text-sm text-gray-600">{admissions.sat_math_25th}</span>
+                                        <span className="text-xs text-gray-400">-</span>
+                                        <span className="text-lg font-bold text-gray-900">{admissions.sat_math_50th}</span>
+                                        <span className="text-xs text-gray-400">-</span>
+                                        <span className="text-sm text-gray-600">{admissions.sat_math_75th}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {admissions.percent_submitting_sat && (
+                            <p className="text-xs text-gray-500 mt-3">
+                                {formatPercentage(admissions.percent_submitting_sat)} of students submitted SAT scores
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
