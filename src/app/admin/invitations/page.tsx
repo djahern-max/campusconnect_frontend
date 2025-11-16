@@ -1,6 +1,8 @@
+// src/app/admin/invitations/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/stores/authStore'; // ADD THIS
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Plus, Copy, CheckCircle, Clock, XCircle, Mail, MessageSquare } from 'lucide-react';
 
@@ -32,7 +34,7 @@ const MESSAGE_TEMPLATES = {
     subject: "Help a Family Find the Perfect College",
     body: `Hello {contact_name},
 
-I hope this message finds you well. My name is Danny Ahern, and I'm reaching out personally about CampusConnect.
+I hope this message finds you well. My name is Dane Ahern, and I'm reaching out personally about CampusConnect.
 
 I built this application for my daughter who is currently looking at colleges and applying for scholarships. I'm just an ordinary family man who loves coding, and I wanted to create something that could help families like mine discover amazing institutions like {institution_name}.
 
@@ -53,7 +55,7 @@ I truly hope you find this website useful for connecting with prospective studen
 Thank you so much for your time and consideration!
 
 Best regards,
-Danny Ahern
+Dane Ahern
 Founder, CampusConnect`
   },
   email_short: {
@@ -66,14 +68,14 @@ Quick message: I've reserved a 30-day free trial of CampusConnect for {instituti
 Code: {invitation_code}
 Link: https://campusconnect.com/register
 
-• Unlimited images
-• Campus tour videos
-• Enhanced profile
-• $39.99/month after trial
+- Unlimited images
+- Campus tour videos
+- Enhanced profile
+- $39.99/month after trial
 
 Questions? Just reply!
 
-Danny Ahern
+Dane Ahern
 CampusConnect`
   },
   linkedin: {
@@ -84,24 +86,25 @@ CampusConnect`
 I'm reaching out about CampusConnect - a platform I built to help students discover institutions like {institution_name}.
 
 I'm offering {institution_name} a 30-day free trial to enhance your profile with:
-• Unlimited campus photos
-• Virtual tour videos  
-• Detailed program descriptions
+- Unlimited campus photos
+- Virtual tour videos  
+- Detailed program descriptions
 
 Invitation code: {invitation_code}
 Register: https://campusconnect.com/register
 
 Would love your feedback as we're constantly improving!
 
-- Danny Ahern`
+- Dane Ahern`
   }
 };
 
 export default function InvitationManagerPage() {
+  const token = useAuthStore((state) => state.token); // GET TOKEN FROM STORE
   const [invitations, setInvitations] = useState<InvitationCode[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // FIXED: was setLoading
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -125,30 +128,49 @@ export default function InvitationManagerPage() {
     fetchScholarships();
   }, []);
 
+  useEffect(() => {
+    if (selectedInvitation && contactName && contactName.length > 1) {
+      const { subject, body } = generateMessage(selectedInvitation, selectedTemplate, contactName);
+      setGeneratedMessage(selectedTemplate.startsWith('email') ? `Subject: ${subject}\n\n${body}` : body);
+    } else {
+      setGeneratedMessage('');
+    }
+  }, [contactName, selectedTemplate, selectedInvitation]);
+
   const fetchInvitations = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      setIsLoading(true); // FIXED
+
+      if (!token) {
+        setError('Not authenticated');
+        return;
+      }
+
       const response = await fetch('http://localhost:8000/api/v1/admin/auth/invitations', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-
-        // Fetch entity names for each invitation using by-ID endpoints
-        const invitationsWithNames = await Promise.all(
-          data.map(async (inv: InvitationCode) => {
-            const entityName = await fetchEntityNameById(inv.entity_type, inv.entity_id);
-            return { ...inv, entity_name: entityName };
-          })
-        );
-
-        setInvitations(invitationsWithNames);
+      if (!response.ok) {
+        throw new Error('Failed to fetch invitations');
       }
-    } catch (err) {
-      console.error('Error fetching invitations:', err);
+
+      const data = await response.json();
+
+      // Fetch entity names for each invitation
+      const invitationsWithNames = await Promise.all(
+        data.map(async (inv: InvitationCode) => ({
+          ...inv,
+          entity_name: await fetchEntityNameById(inv.entity_type, inv.entity_id)
+        }))
+      );
+
+      setInvitations(invitationsWithNames);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // FIXED
     }
   };
 
@@ -203,11 +225,15 @@ export default function InvitationManagerPage() {
     setError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setError('Not authenticated');
+        return;
+      }
+
       const response = await fetch('http://localhost:8000/api/v1/admin/auth/invitations', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`, // FIXED: use token from store
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -255,11 +281,43 @@ export default function InvitationManagerPage() {
     };
   };
 
-  const handleGenerateMessage = () => {
+  const handleGenerateMessage = async () => {
     if (!selectedInvitation || !contactName) return;
 
     const { subject, body } = generateMessage(selectedInvitation, selectedTemplate, contactName);
     setGeneratedMessage(selectedTemplate.startsWith('email') ? `Subject: ${subject}\n\n${body}` : body);
+
+    const contactMethod = selectedTemplate === 'linkedin' ? 'linkedin' : 'email';
+
+    try {
+      if (!token) return;
+
+      const response = await fetch('http://localhost:8000/api/v1/admin/outreach', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          entity_type: selectedInvitation.entity_type,
+          entity_id: selectedInvitation.entity_id,
+          contact_name: contactName,
+          contact_email: selectedInvitation.assigned_email || '',
+          notes: `Generated ${selectedTemplate} message. Invitation code: ${selectedInvitation.code}`,
+          contact_method: contactMethod
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Outreach tracked');
+      } else {
+        const errorData = await response.json();
+        console.error('Backend error:', errorData);  // LOG THE ACTUAL ERROR
+        alert(`Error: ${JSON.stringify(errorData)}`);  // SHOW TO USER
+      }
+    } catch (err) {
+      console.error('Error tracking outreach:', err);
+    }
   };
 
   const copyToClipboard = async (text: string) => {
@@ -302,6 +360,39 @@ export default function InvitationManagerPage() {
         return <XCircle className="h-4 w-4" />;
       default:
         return null;
+    }
+  };
+
+  const createOutreachRecord = async (invitation: InvitationCode) => {
+    try {
+      if (!token) {
+        setError('Not authenticated');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/admin/outreach', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          entity_type: invitation.entity_type,
+          entity_id: invitation.entity_id,
+          contact_email: invitation.assigned_email,
+          notes: `Invitation code: ${invitation.code}`
+        })
+      });
+
+      if (response.ok) {
+        alert('✅ Outreach record created! Check the Outreach page.');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Failed to create outreach record');
+      }
+    } catch (err: any) {
+      console.error('Failed to create outreach record:', err);
+      setError('Failed to create outreach record');
     }
   };
 
@@ -394,7 +485,13 @@ export default function InvitationManagerPage() {
             <button
               type="submit"
               disabled={isCreating}
-              className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="
+                inline-flex items-center justify-center
+                px-4 py-2
+                bg-gray-600 hover:bg-gray-700
+                text-white font-medium rounded-lg
+                transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+              "
             >
               {isCreating ? 'Creating...' : (
                 <>
@@ -407,6 +504,7 @@ export default function InvitationManagerPage() {
         </CardBody>
       </Card>
 
+      {/* Rest of the component stays the same... */}
       {/* Invitations List */}
       <Card>
         <CardHeader>
@@ -415,7 +513,7 @@ export default function InvitationManagerPage() {
         <CardBody>
           {isLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
             </div>
           ) : invitations.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -459,6 +557,7 @@ export default function InvitationManagerPage() {
                       </div>
                     </div>
 
+
                     <div className="flex items-center space-x-2">
                       <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(invitation.status)}`}>
                         {getStatusIcon(invitation.status)}
@@ -466,14 +565,23 @@ export default function InvitationManagerPage() {
                       </span>
 
                       {invitation.status === 'pending' && (
-                        <button
-                          onClick={() => openMessageGenerator(invitation)}
-                          className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium"
-                          title="Generate message"
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Generate Message
-                        </button>
+                        <>
+                          <button
+                            onClick={() => openMessageGenerator(invitation)}
+                            className="
+          inline-flex items-center
+          px-3 py-1
+          bg-gray-100 hover:bg-gray-200
+          text-gray-700 text-sm font-medium
+          rounded-lg transition-colors
+        "
+                            title="Generate message"
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            Generate Message
+                          </button>
+
+                        </>
                       )}
                     </div>
                   </div>
@@ -484,7 +592,7 @@ export default function InvitationManagerPage() {
         </CardBody>
       </Card>
 
-      {/* Message Generator Modal */}
+      {/* Message Generator Modal - keeping your existing code */}
       {showMessageModal && selectedInvitation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -500,7 +608,6 @@ export default function InvitationManagerPage() {
               </div>
 
               <div className="space-y-4">
-                {/* Institution Info */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="text-sm text-blue-900">
                     <strong>{selectedInvitation.entity_name}</strong>
@@ -508,7 +615,6 @@ export default function InvitationManagerPage() {
                   </div>
                 </div>
 
-                {/* Contact Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Contact Name *
@@ -522,7 +628,6 @@ export default function InvitationManagerPage() {
                   />
                 </div>
 
-                {/* Template Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Message Template
@@ -533,14 +638,14 @@ export default function InvitationManagerPage() {
                         key={key}
                         onClick={() => setSelectedTemplate(key as keyof typeof MESSAGE_TEMPLATES)}
                         className={`p-3 rounded-lg border-2 text-left transition-colors ${selectedTemplate === key
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-gray-600 bg-gray-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         {key.startsWith('email') ? (
-                          <Mail className="h-5 w-5 mb-2 text-blue-600" />
+                          <Mail className="h-5 w-5 mb-2 text-gray-700" />
                         ) : (
-                          <MessageSquare className="h-5 w-5 mb-2 text-blue-700" />
+                          <MessageSquare className="h-5 w-5 mb-2 text-gray-700" />
                         )}
                         <div className="font-medium text-sm">{template.name}</div>
                       </button>
@@ -548,28 +653,25 @@ export default function InvitationManagerPage() {
                   </div>
                 </div>
 
-                {/* Generate Button */}
-                <button
+                {/* <button
                   onClick={handleGenerateMessage}
                   disabled={!contactName}
-                  className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="
+                    w-full px-4 py-2
+                    bg-gray-600 hover:bg-gray-700
+                    text-white font-medium rounded-lg
+                    transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                  "
                 >
-                  Generate Message
-                </button>
+                  Create Message
+                </button> */}
 
-                {/* Generated Message */}
                 {generatedMessage && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Generated Message
                       </label>
-                      <button
-                        onClick={() => copyToClipboard(generatedMessage)}
-                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        {copiedCode === generatedMessage ? '✓ Copied!' : 'Copy to Clipboard'}
-                      </button>
                     </div>
                     <textarea
                       value={generatedMessage}
@@ -577,6 +679,45 @@ export default function InvitationManagerPage() {
                       rows={15}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
                     />
+
+                    {/* TWO BUTTONS: Copy only, or Copy & Close */}
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        onClick={() => copyToClipboard(generatedMessage)}
+                        className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                      >
+                        {copiedCode === generatedMessage ? (
+                          <>
+                            <CheckCircle className="h-5 w-5 mr-2" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-5 w-5 mr-2" />
+                            Copy to Clipboard
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={async () => {
+                          // CALL THE TRACKING FUNCTION FIRST
+                          await handleGenerateMessage();
+
+                          // Then copy and close
+                          await copyToClipboard(generatedMessage);
+                          setTimeout(() => {
+                            setShowMessageModal(false);
+                            setGeneratedMessage('');
+                            setContactName('');
+                          }, 800);
+                        }}
+                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                      >
+                        <Copy className="h-5 w-5 mr-2" />
+                        Copy & Close
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -6,12 +6,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { 
-  Users, 
-  Mail, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Users,
+  Mail,
+  CheckCircle,
+  XCircle,
+  Clock,
   TrendingUp,
   Send,
   MessageSquare,
@@ -39,30 +39,54 @@ interface OutreachRecord {
   entity_type: string;
   entity_id: number;
   contact_name?: string;
+  contact_title?: string;
   contact_email?: string;
+  contact_phone?: string;
+  linkedin_url?: string;
   status: string;
   last_contact_date?: string;
   last_contact_method?: string;
   contact_attempt_count: number;
-  next_follow_up_date?: string;
-  priority: string;
+  invitation_code_id?: number;
   invitation_sent_date?: string;
+  next_follow_up_date?: string;
+  follow_up_count: number;
+  notes?: string;
+  response_feedback?: string;
+  registered_date?: string;
+  registered_admin_id?: number;
+  priority: string;
+  tags?: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+}
+
+interface OutreachDetailModalProps {
+  record: OutreachRecord | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: () => void;
 }
 
 export default function OutreachDashboard() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
+
   const [stats, setStats] = useState<OutreachStats | null>(null);
   const [outreach, setOutreach] = useState<OutreachRecord[]>([]);
   const [filteredOutreach, setFilteredOutreach] = useState<OutreachRecord[]>([]);
-  
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFollowUpsOnly, setShowFollowUpsOnly] = useState(false);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRecords, setSelectedRecords] = useState<number[]>([]);
+
+  // Modal state
+  const [selectedRecord, setSelectedRecord] = useState<OutreachRecord | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -75,45 +99,63 @@ export default function OutreachDashboard() {
   useEffect(() => {
     // Apply filters
     let filtered = [...outreach];
-    
+
     if (statusFilter !== 'all') {
       filtered = filtered.filter(r => r.status === statusFilter);
     }
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         r.entity_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.contact_email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (showFollowUpsOnly) {
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         r.next_follow_up_date && new Date(r.next_follow_up_date) <= new Date()
       );
     }
-    
+
     setFilteredOutreach(filtered);
   }, [outreach, statusFilter, searchTerm, showFollowUpsOnly]);
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      
+      const token = useAuthStore.getState().token;
+
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
       // Fetch stats
-      const statsResponse = await apiClient.get('/admin/outreach/stats', {
-        headers: { Authorization: `Bearer ${token}` }
+      const statsResponse = await fetch('http://localhost:8000/api/v1/admin/outreach/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      setStats(statsResponse.data);
-      
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      }
+
       // Fetch outreach records
-      const outreachResponse = await apiClient.get('/admin/outreach', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { limit: 500 }
+      const outreachResponse = await fetch('http://localhost:8000/api/v1/admin/outreach?limit=500', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      setOutreach(outreachResponse.data);
-      setFilteredOutreach(outreachResponse.data);
+
+      if (outreachResponse.ok) {
+        const outreachData = await outreachResponse.json();
+        setOutreach(outreachData);
+        setFilteredOutreach(outreachData);
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -226,7 +268,7 @@ export default function OutreachDashboard() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1"
               />
-              
+
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -244,21 +286,13 @@ export default function OutreachDashboard() {
 
             <div className="flex gap-2">
               <Button
-                variant={showFollowUpsOnly ? 'primary' : 'secondary'}
+                variant="secondary"
                 size="sm"
                 onClick={() => setShowFollowUpsOnly(!showFollowUpsOnly)}
+                style={{ minWidth: '180px' }}
               >
                 <Clock className="h-4 w-4 mr-2" />
-                Follow-ups ({stats?.pending_followups || 0})
-              </Button>
-              
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => router.push('/admin/outreach/templates')}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Templates
+                {showFollowUpsOnly ? 'Total Outreach' : `Due Today (${stats?.pending_followups || 0})`}
               </Button>
             </div>
           </div>
@@ -280,8 +314,8 @@ export default function OutreachDashboard() {
                   <Send className="h-4 w-4 mr-2" />
                   Send Invitations
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setSelectedRecords([])}
                 >
@@ -333,14 +367,22 @@ export default function OutreachDashboard() {
                       Attempts
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
+                      Method
                     </th>
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredOutreach.map((record) => (
-                    <tr key={record.id} className={`hover:bg-gray-50 ${getPriorityColor(record.priority)}`}>
-                      <td className="px-4 py-4">
+                    <tr
+                      key={record.id}
+                      className={`hover:bg-gray-50 cursor-pointer ${getPriorityColor(record.priority)}`}
+                      onClick={() => {
+                        setSelectedRecord(record);
+                        setShowDetailModal(true);
+                      }}
+                    >
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={selectedRecords.includes(record.id)}
@@ -380,7 +422,7 @@ export default function OutreachDashboard() {
                           <div>
                             <p>{new Date(record.last_contact_date).toLocaleDateString()}</p>
                             {record.last_contact_method && (
-                              <p className="text-xs text-gray-500">{record.last_contact_method}</p>
+                              <p className="text-xs text-gray-500 capitalize">{record.last_contact_method}</p>
                             )}
                           </div>
                         ) : (
@@ -388,29 +430,28 @@ export default function OutreachDashboard() {
                         )}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-900">
-                        <span className="font-medium">{record.contact_attempt_count}</span>
+                        <span className="font-medium">{record.contact_attempt_count || 0}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => router.push(`/admin/outreach/${record.id}`)}
-                            className="p-1 text-gray-600 hover:text-primary-600"
-                            title="View Details"
-                          >
-                            <Mail className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="p-1 text-gray-600 hover:text-blue-600"
-                            title="LinkedIn"
-                          >
-                            <Linkedin className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="p-1 text-gray-600 hover:text-green-600"
-                            title="Call"
-                          >
-                            <Phone className="h-4 w-4" />
-                          </button>
+                        <div className="flex gap-2 text-sm text-gray-500">
+                          {record.contact_email && (
+                            <span className="flex items-center">
+                              <Mail className="h-4 w-4 mr-1" />
+                              Email
+                            </span>
+                          )}
+                          {record.linkedin_url && (
+                            <span className="flex items-center">
+                              <Linkedin className="h-4 w-4 mr-1" />
+                              LinkedIn
+                            </span>
+                          )}
+                          {record.contact_phone && (
+                            <span className="flex items-center">
+                              <Phone className="h-4 w-4 mr-1" />
+                              Phone
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -421,19 +462,299 @@ export default function OutreachDashboard() {
           </CardBody>
         </Card>
       </div>
+
+      {/* Detail Modal */}
+      <OutreachDetailModal
+        record={selectedRecord}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedRecord(null);
+        }}
+        onUpdate={fetchData}
+      />
     </div>
   );
 }
 
-function StatsCard({ 
-  title, 
-  value, 
-  icon, 
-  subtitle 
-}: { 
-  title: string; 
-  value: number | string; 
-  icon: React.ReactNode; 
+// Outreach Detail Modal Component
+function OutreachDetailModal({ record, isOpen, onClose, onUpdate }: OutreachDetailModalProps) {
+  const token = useAuthStore((state) => state.token);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [followUpNote, setFollowUpNote] = useState('');
+  const [nextFollowUpDate, setNextFollowUpDate] = useState('');
+  const [newStatus, setNewStatus] = useState('');
+
+  useEffect(() => {
+    if (record) {
+      setNewStatus(record.status);
+      // Set default follow-up date to 7 days from now
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      setNextFollowUpDate(defaultDate.toISOString().split('T')[0]);
+    }
+  }, [record]);
+
+  if (!isOpen || !record) return null;
+
+  const handleSubmitFollowUp = async () => {
+    if (!followUpNote.trim()) {
+      alert('Please add a follow-up note');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      const newNote = `\n[${timestamp}] ${followUpNote}`;
+
+      const response = await fetch(`http://localhost:8000/api/v1/admin/outreach/${record.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          notes: (record.notes || '') + newNote,
+          next_follow_up_date: nextFollowUpDate ? new Date(nextFollowUpDate).toISOString() : null
+        })
+      });
+
+      if (response.ok) {
+        setFollowUpNote('');
+        onUpdate();
+        onClose();
+      } else {
+        alert('Failed to update record');
+      }
+    } catch (err) {
+      console.error('Failed to update:', err);
+      alert('Error updating record');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Parse notes into timeline entries
+  const timelineEntries = (record.notes || '').split('\n').filter(line => line.trim());
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{record.entity_name}</h2>
+              <p className="text-sm text-gray-500 mt-1 capitalize">{record.entity_type}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Contact Information */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Contact Information</h3>
+              <div className="space-y-2 text-sm">
+                {record.contact_name && (
+                  <div>
+                    <span className="text-gray-600">Name:</span>
+                    <span className="ml-2 font-medium">{record.contact_name}</span>
+                  </div>
+                )}
+                {record.contact_title && (
+                  <div>
+                    <span className="text-gray-600">Title:</span>
+                    <span className="ml-2 font-medium">{record.contact_title}</span>
+                  </div>
+                )}
+                {record.contact_email && (
+                  <div>
+                    <span className="text-gray-600">Email:</span>
+                    <span className="ml-2 font-medium">{record.contact_email}</span>
+                  </div>
+                )}
+                {record.contact_phone && (
+                  <div>
+                    <span className="text-gray-600">Phone:</span>
+                    <span className="ml-2 font-medium">{record.contact_phone}</span>
+                  </div>
+                )}
+                {record.linkedin_url && (
+                  <div>
+                    <span className="text-gray-600">LinkedIn:</span>
+                    <a
+                      href={record.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 text-blue-600 hover:underline"
+                    >
+                      View Profile
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Status & Stats */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Outreach Status</h3>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-gray-600">Status:</span>
+                  <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${record.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
+                    record.status === 'registered' ? 'bg-green-100 text-green-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                    {record.status.replace('_', ' ')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Contact Attempts:</span>
+                  <span className="ml-2 font-medium">{record.contact_attempt_count}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Last Contact:</span>
+                  <span className="ml-2 font-medium">
+                    {record.last_contact_date
+                      ? new Date(record.last_contact_date).toLocaleDateString()
+                      : 'Never'
+                    }
+                  </span>
+                </div>
+                {record.next_follow_up_date && (
+                  <div>
+                    <span className="text-gray-600">Next Follow-up:</span>
+                    <span className="ml-2 font-medium">
+                      {new Date(record.next_follow_up_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-gray-600">Priority:</span>
+                  <span className={`ml-2 font-medium ${record.priority === 'high' ? 'text-red-600' :
+                    record.priority === 'low' ? 'text-gray-500' :
+                      'text-blue-600'
+                    }`}>
+                    {record.priority}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Timeline */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3">Activity Timeline</h3>
+            <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
+              {timelineEntries.length > 0 ? (
+                <div className="space-y-3">
+                  {timelineEntries.map((entry, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                      <div className="flex-1 text-sm text-gray-700">
+                        {entry}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No activity recorded yet</p>
+              )}
+            </div>
+          </div>
+
+          {/* Add Follow-up Form */}
+          <div className="border-t pt-6">
+            <h3 className="font-semibold text-gray-900 mb-4">Add Follow-up</h3>
+
+            <div className="space-y-4">
+              {/* Status Update */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Update Status
+                </label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="contacted">Contacted</option>
+                  <option value="follow_up_sent">Follow-up Sent</option>
+                  <option value="registered">Registered</option>
+                  <option value="declined">Declined</option>
+                  <option value="no_response">No Response</option>
+                </select>
+              </div>
+
+              {/* Follow-up Note */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Follow-up Note *
+                </label>
+                <textarea
+                  value={followUpNote}
+                  onChange={(e) => setFollowUpNote(e.target.value)}
+                  placeholder="What happened in this follow-up? Any response or next steps?"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Next Follow-up Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Next Follow-up Date
+                </label>
+                <input
+                  type="date"
+                  value={nextFollowUpDate}
+                  onChange={(e) => setNextFollowUpDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleSubmitFollowUp}
+                  disabled={isSubmitting || !followUpNote.trim()}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Follow-up'}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Stats Card Component
+function StatsCard({
+  title,
+  value,
+  icon,
+  subtitle
+}: {
+  title: string;
+  value: number | string;
+  icon: React.ReactNode;
   subtitle: string;
 }) {
   return (

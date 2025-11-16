@@ -5,9 +5,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardBody } from '@/components/ui/Card';
+import { useAuthStore } from '@/stores/authStore'; // ADD THIS
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const login = useAuthStore((state) => state.login); // ADD THIS
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,21 +35,20 @@ export default function AdminLoginPage() {
       const data = await response.json();
       const { access_token } = data;
 
-      localStorage.setItem('auth_token', access_token);
-
       const userResponse = await fetch('http://localhost:8000/api/v1/admin/auth/me', {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        localStorage.setItem('user', JSON.stringify(userData));
+      if (!userResponse.ok) throw new Error('Failed to fetch user data');
 
-        if (userData.role === 'super_admin') {
-          router.push('/admin/invitations');
-        } else {
-          router.push('/admin/dashboard');
-        }
+      const userData = await userResponse.json();
+
+      // THIS IS THE KEY CHANGE - Use the store's login function
+      login(access_token, userData);
+
+      // Redirect based on role
+      if (userData.role === 'super_admin') {
+        router.push('/admin/invitations');
       } else {
         router.push('/admin/dashboard');
       }
@@ -63,15 +64,12 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full">
         <Card>
           <CardBody className="p-8">
-
-            {/* Unified header */}
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-1">Admin Login</h1>
               <p className="text-gray-600 text-sm">Sign in to manage your institution</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
@@ -86,7 +84,6 @@ export default function AdminLoginPage() {
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input
@@ -100,14 +97,12 @@ export default function AdminLoginPage() {
                 />
               </div>
 
-              {/* Error */}
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                   {error}
                 </div>
               )}
 
-              {/* 🔥 Grey Theme Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -123,7 +118,6 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            {/* Links */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Need an account?{' '}
@@ -141,7 +135,6 @@ export default function AdminLoginPage() {
                 Regular admins: Register at /admin/register with your invitation code
               </p>
             </div>
-
           </CardBody>
         </Card>
       </div>

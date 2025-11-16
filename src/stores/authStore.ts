@@ -9,6 +9,7 @@ interface AuthState {
   login: (token: string, user: AdminUser) => void;
   logout: () => void;
   setUser: (user: AdminUser) => void;
+  clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,6 +24,13 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem('access_token', token);
         }
         set({ token, user, isAuthenticated: true });
+      },
+
+      clearAuth: () => {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+        }
+        set({ token: null, user: null, isAuthenticated: false });
       },
 
       logout: () => {
