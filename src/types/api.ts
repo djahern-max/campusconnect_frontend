@@ -41,6 +41,8 @@ export interface AdminUser {
   entity_id: number;
   role: string;
   is_active: boolean;
+  created_at: string;
+  last_login?: string;
 }
 
 export interface DisplaySettings {

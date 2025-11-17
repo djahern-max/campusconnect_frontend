@@ -1,3 +1,4 @@
+//src/app/admin/gallery/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,7 +17,7 @@ export default function GalleryPage() {
   const { data: images, isLoading, error, refetch } = useGallery();
   const uploadMutation = useUploadImage();
   const deleteMutation = useDeleteImage();
-  
+
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [captions, setCaptions] = useState<{ [key: string]: string }>({});
   const [imageTypes, setImageTypes] = useState<{ [key: string]: string }>({});
@@ -36,7 +37,7 @@ export default function GalleryPage() {
       if (acceptedFiles.length > 0) {
         setSelectedFiles(prev => [...prev, ...acceptedFiles]);
       }
-      
+
       if (rejectedFiles.length > 0) {
         const reasons = rejectedFiles.map(f => {
           const errors = f.errors.map(e => {
@@ -121,9 +122,8 @@ export default function GalleryPage() {
           <CardBody>
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition ${
-                isDragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400'
-              }`}
+              className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition ${isDragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400'
+                }`}
             >
               <input {...getInputProps()} />
               <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -140,7 +140,7 @@ export default function GalleryPage() {
             {selectedFiles.length > 0 && (
               <div className="mt-6 space-y-4">
                 <h3 className="font-semibold text-gray-900">Selected Files ({selectedFiles.length})</h3>
-                
+
                 {selectedFiles.map((file) => (
                   <div key={file.name} className="border border-gray-200 rounded-lg p-4 bg-white">
                     <div className="flex items-start justify-between mb-3">
@@ -162,7 +162,7 @@ export default function GalleryPage() {
                         value={captions[file.name] || ''}
                         onChange={(e) => setCaptions({ ...captions, [file.name]: e.target.value })}
                       />
-                      
+
                       <select
                         value={imageTypes[file.name] || 'campus'}
                         onChange={(e) => setImageTypes({ ...imageTypes, [file.name]: e.target.value })}
@@ -232,10 +232,10 @@ export default function GalleryPage() {
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
-                        
-                        <a 
-                          href={image.cdn_url} 
-                          target="_blank" 
+
+                        <a
+                          href={image.cdn_url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition inline-flex items-center justify-center"
                         >

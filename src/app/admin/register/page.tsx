@@ -1,3 +1,4 @@
+//src/app/admin/register/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -93,7 +94,7 @@ export default function AdminRegisterPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Registration</h1>
           <p className="mt-2 text-gray-600">
-            {step === 'validate' 
+            {step === 'validate'
               ? 'Enter your invitation code to get started'
               : 'Complete your registration'
             }

@@ -35,7 +35,7 @@ export function Navbar() {
     ? isAuthActionLoading
       ? 'Logging out...'
       : 'Logout'
-    : 'Admin Login';
+    : 'Login';
 
   const authButtonVariant = isAuthenticated ? 'ghost' : 'primary';
 

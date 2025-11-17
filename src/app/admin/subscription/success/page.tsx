@@ -2,19 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function SubscriptionSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const user = useAuthStore((state) => state.user);
   const [isVerifying, setIsVerifying] = useState(true);
-  
+
+  const isScholarship = user?.entity_type === 'scholarship';
+  const buttonColors = isScholarship
+    ? 'bg-green-600 hover:bg-green-700'
+    : 'bg-blue-600 hover:bg-blue-700';
+
   useEffect(() => {
     // Verify session_id from Stripe
     const sessionId = searchParams.get('session_id');
-    
+
     if (sessionId) {
       // Optional: Verify with backend
       setTimeout(() => {
@@ -50,16 +56,16 @@ export default function SubscriptionSuccessPage() {
           <div className="bg-green-100 rounded-full p-4 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
             <CheckCircle className="h-16 w-16 text-green-600" />
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Welcome to CampusConnect! 🎉
           </h1>
-          
+
           <p className="text-lg text-gray-700 mb-6">
             Your 30-day free trial has started successfully
           </p>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 text-left">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-left">
             <h3 className="font-semibold text-blue-900 mb-3">What's Next?</h3>
             <ul className="space-y-2 text-sm text-blue-800">
               <li className="flex items-start">
@@ -81,20 +87,23 @@ export default function SubscriptionSuccessPage() {
             </ul>
           </div>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-700">
-              <strong>Trial Details:</strong> Your free trial lasts 30 days. 
+              <strong>Trial Details:</strong> Your free trial lasts 30 days.
               After that, you'll be charged $39.99/month. You can cancel anytime.
             </p>
           </div>
 
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => router.push('/admin/dashboard')}
-          >
-            Go to Dashboard
-          </Button>
+          {/* Navigation Button - Using native button with Tailwind */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => router.push('/admin/dashboard')}
+              className={`inline-flex items-center gap-2 px-8 py-4 ${buttonColors} text-white font-semibold text-lg rounded-lg transition-all shadow-lg hover:shadow-xl`}
+            >
+              Go to Dashboard
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          </div>
         </CardBody>
       </Card>
     </div>

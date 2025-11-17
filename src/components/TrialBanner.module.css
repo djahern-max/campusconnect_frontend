@@ -1,0 +1,51 @@
+/* src/components/TrialBanner.module.css */
+.banner {
+    padding: 12px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.normal {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.warning {
+    background: #fed7aa;
+    color: #9a3412;
+}
+
+.urgent {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icon {
+    font-size: 20px;
+}
+
+.message {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.upgradeButton {
+    padding: 6px 16px;
+    background: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.upgradeButton:hover {
+    transform: scale(1.05);
+}
