@@ -1,3 +1,4 @@
+// src/app/contact/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -5,29 +6,44 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Building2, Mail, Phone, Check } from 'lucide-react';
+import apiClient from '@/api/client';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    institution: '',
-    phone: '',
-    entityType: 'institution',
+    institution_name: '',
+    phone_number: '',
+    inquiry_type: 'HIGHER_EDUCATION',
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate form submission
-    // In production, you'd send this to your backend or email service
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Submit to backend API
+      await apiClient.post('/contact/submit', {
+        name: formData.name,
+        email: formData.email,
+        institution_name: formData.institution_name,
+        phone_number: formData.phone_number || null,
+        inquiry_type: formData.inquiry_type,
+        message: formData.message
+      });
 
-    setIsSubmitted(true);
-    setIsLoading(false);
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error('Failed to submit inquiry:', err);
+      setError(err.response?.data?.detail || 'Failed to submit inquiry. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -60,9 +76,9 @@ export default function ContactPage() {
                 setFormData({
                   name: '',
                   email: '',
-                  institution: '',
-                  phone: '',
-                  entityType: 'institution',
+                  institution_name: '',
+                  phone_number: '',
+                  inquiry_type: 'HIGHER_EDUCATION',
                   message: ''
                 });
               }}
@@ -115,6 +131,13 @@ export default function ContactPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Request Information
             </h2>
+
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -150,29 +173,29 @@ export default function ContactPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="institution" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="institution_name" className="block text-sm font-medium text-gray-700 mb-2">
                     Institution/Organization Name *
                   </label>
                   <Input
-                    id="institution"
-                    name="institution"
+                    id="institution_name"
+                    name="institution_name"
                     type="text"
                     required
-                    value={formData.institution}
+                    value={formData.institution_name}
                     onChange={handleChange}
                     placeholder="University of Example"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
                   </label>
                   <Input
-                    id="phone"
-                    name="phone"
+                    id="phone_number"
+                    name="phone_number"
                     type="tel"
-                    value={formData.phone}
+                    value={formData.phone_number}
                     onChange={handleChange}
                     placeholder="(555) 123-4567"
                   />
@@ -180,19 +203,20 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label htmlFor="entityType" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="inquiry_type" className="block text-sm font-medium text-gray-700 mb-2">
                   Type *
                 </label>
                 <select
-                  id="entityType"
-                  name="entityType"
+                  id="inquiry_type"
+                  name="inquiry_type"
                   required
-                  value={formData.entityType}
+                  value={formData.inquiry_type}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 >
-                  <option value="institution">Higher Education Institution</option>
-                  <option value="scholarship">Scholarship Program</option>
+                  <option value="HIGHER_EDUCATION">Higher Education Institution</option>
+                  <option value="SCHOLARSHIP_ORGANIZATION">Scholarship Organization</option>
+                  <option value="OTHER">Other</option>
                 </select>
               </div>
 
@@ -204,6 +228,7 @@ export default function ContactPage() {
                   id="message"
                   name="message"
                   rows={4}
+                  required
                   value={formData.message}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -237,8 +262,8 @@ export default function ContactPage() {
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">
             Questions? Email us at{' '}
-            <a href="mailto:contact@campusconnect.com" className="text-gray-900 font-medium hover:underline">
-              contact@campusconnect.com
+            <a href="mailto:dane@magicscholar.com" className="text-gray-900 font-medium hover:underline">
+              dane@magicscholar.com
             </a>
           </p>
         </div>

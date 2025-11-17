@@ -1,9 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Search, GraduationCap, DollarSign, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Search,
+  GraduationCap,
+  DollarSign,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import Image from 'next/image';
 import axios from 'axios';
 
@@ -18,6 +25,15 @@ interface Institution {
   primary_image_url: string | null;
 }
 
+const FALLBACK_INSTITUTION: Institution = {
+  id: 0,
+  ipeds_id: 0,
+  name: 'Discover Your Perfect College',
+  city: 'Nationwide',
+  state: 'US',
+  primary_image_url: null
+};
+
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -26,54 +42,50 @@ export default function HomePage() {
 
   // Fetch all institutions with images
   useEffect(() => {
+    let isMounted = true;
+
     const fetchFeaturedInstitutions = async () => {
       try {
-        // Fetch all institutions (up to 100)
-        const response = await axios.get(`${API_URL}/api/v1/institutions`, {
+        const response = await axios.get<Institution[]>(`${API_URL}/api/v1/institutions`, {
           params: { limit: 100 }
         });
 
-        // Filter to only institutions with images
-        const withImages = response.data.filter((inst: Institution) => inst.primary_image_url);
+        if (!isMounted) return;
+
+        const withImages = response.data.filter((inst) => inst.primary_image_url);
 
         if (withImages.length > 0) {
-          // Shuffle for variety each time page loads
-          const shuffled = withImages.sort(() => Math.random() - 0.5);
+          // Shuffle for variety each time page loads (clone first to avoid mutating original)
+          const shuffled = [...withImages].sort(() => Math.random() - 0.5);
           // Take up to 10 institutions
           setFeaturedInstitutions(shuffled.slice(0, 10));
         } else {
           // If no images, use fallback placeholder
-          setFeaturedInstitutions([{
-            id: 0,
-            ipeds_id: 0,
-            name: 'Discover Your Perfect College',
-            city: 'Nationwide',
-            state: 'US',
-            primary_image_url: null
-          }]);
+          setFeaturedInstitutions([FALLBACK_INSTITUTION]);
         }
       } catch (error) {
         console.error('Failed to fetch institutions:', error);
+        if (!isMounted) return;
+
         // Fallback to placeholder
-        setFeaturedInstitutions([{
-          id: 0,
-          ipeds_id: 0,
-          name: 'Discover Your Perfect College',
-          city: 'Nationwide',
-          state: 'US',
-          primary_image_url: null
-        }]);
+        setFeaturedInstitutions([FALLBACK_INSTITUTION]);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchFeaturedInstitutions();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Auto-advance carousel
   useEffect(() => {
-    if (!isAutoPlaying || featuredInstitutions.length === 0) return;
+    if (!isAutoPlaying || featuredInstitutions.length <= 1) return;
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featuredInstitutions.length);
@@ -93,12 +105,30 @@ export default function HomePage() {
   };
 
   if (isLoading) {
+    // Skeleton hero while loading
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div>
+        <section className="relative h-[700px] bg-gray-900 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
+          <div className="relative h-full flex flex-col justify-end pb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+              <div className="text-white">
+                <div className="h-10 w-2/3 bg-white/10 rounded mb-4 animate-pulse" />
+                <div className="h-6 w-1/2 bg-white/10 rounded mb-2 animate-pulse" />
+                <div className="h-6 w-1/3 bg-white/10 rounded mb-8 animate-pulse" />
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="h-12 w-48 bg-white/10 rounded animate-pulse" />
+                  <div className="h-12 w-52 bg-white/10 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
+
+  const activeInstitution = featuredInstitutions[currentSlide];
 
   return (
     <div>
@@ -120,8 +150,7 @@ export default function HomePage() {
                     fill
                     className="object-cover"
                     priority={index === 0}
-                    unoptimized
-                    quality={100}
+                    quality={75}
                     sizes="100vw"
                   />
                   {/* Overlay */}
@@ -140,28 +169,36 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="text-white">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4">
-                Find Your Perfect College
+                Find Your Perfect College with CampusConnect
               </h1>
-              {featuredInstitutions[currentSlide] && (
+              {activeInstitution && (
                 <>
                   <p className="text-xl sm:text-2xl text-gray-200 mb-2">
-                    {featuredInstitutions[currentSlide].name}
+                    {activeInstitution.name}
                   </p>
                   <p className="text-lg text-gray-300 mb-8">
-                    {featuredInstitutions[currentSlide].city}, {featuredInstitutions[currentSlide].state}
+                    {activeInstitution.city}, {activeInstitution.state}
                   </p>
                 </>
               )}
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/institutions">
-                  <Button variant="primary" size="lg" className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100"
+                  >
                     <Search className="mr-2 h-5 w-5 text-black" />
                     Explore Institutions
                   </Button>
                 </Link>
                 <Link href="/scholarships">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white/90 !text-black border-2 border-white hover:bg-white">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white/90 !text-black border-2 border-white hover:bg-white"
+                  >
                     <DollarSign className="mr-2 h-5 w-5 text-black" />
                     Find Scholarships
                   </Button>
@@ -199,10 +236,11 @@ export default function HomePage() {
                     setIsAutoPlaying(false);
                   }}
                   className={`w-2 h-2 rounded-full transition-all ${index === currentSlide
-                      ? 'bg-white w-8'
-                      : 'bg-white/50 hover:bg-white/75'
+                    ? 'bg-white w-8'
+                    : 'bg-white/50 hover:bg-white/75'
                     }`}
                   aria-label={`Go to slide ${index + 1}`}
+                  aria-current={index === currentSlide ? 'true' : undefined}
                 />
               ))}
             </div>
@@ -271,7 +309,7 @@ export default function HomePage() {
       <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            For Institutions & Scholarships
+            For Institutions &amp; Scholarships
           </h2>
           <p className="text-xl text-gray-300 mb-8">
             Create a rich, customizable page for your institution or scholarship. Showcase your campus
@@ -293,7 +331,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="mt-6 text-sm text-gray-400">
-            Premium features available • $39.99/month • 30-day free trial
+            Page customization available • 30-day free trial
           </p>
         </div>
       </section>
@@ -301,7 +339,15 @@ export default function HomePage() {
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function FeatureCard({
+  icon,
+  title,
+  description
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="bg-white p-8 rounded-lg border border-gray-200 hover:border-gray-400 transition">
       <div className="mb-4">{icon}</div>

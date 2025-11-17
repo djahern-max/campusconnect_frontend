@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/stores/authStore'; // ADD THIS
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Plus, Copy, CheckCircle, Clock, XCircle, Mail, MessageSquare } from 'lucide-react';
 
@@ -100,11 +101,13 @@ Would love your feedback as we're constantly improving!
 };
 
 export default function InvitationManagerPage() {
-  const token = useAuthStore((state) => state.token); // GET TOKEN FROM STORE
+  const router = useRouter();
+  const { token, isAuthenticated } = useAuthStore(); // Get both token and isAuthenticated
+
   const [invitations, setInvitations] = useState<InvitationCode[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // FIXED: was setLoading
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -122,11 +125,21 @@ export default function InvitationManagerPage() {
   const [assignedEmail, setAssignedEmail] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('30');
 
+  // Check authentication
   useEffect(() => {
-    fetchInvitations();
-    fetchInstitutions();
-    fetchScholarships();
-  }, []);
+    if (!isAuthenticated) {
+      router.push('/admin/login');
+      return;
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchInvitations();
+      fetchInstitutions();
+      fetchScholarships();
+    }
+  }, [isAuthenticated, token]);
 
   useEffect(() => {
     if (selectedInvitation && contactName && contactName.length > 1) {
@@ -139,12 +152,7 @@ export default function InvitationManagerPage() {
 
   const fetchInvitations = async () => {
     try {
-      setIsLoading(true); // FIXED
-
-      if (!token) {
-        setError('Not authenticated');
-        return;
-      }
+      setIsLoading(true);
 
       const response = await fetch('http://localhost:8000/api/v1/admin/auth/invitations', {
         headers: {
@@ -167,10 +175,11 @@ export default function InvitationManagerPage() {
       );
 
       setInvitations(invitationsWithNames);
+      setError(''); // Clear any previous errors
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setIsLoading(false); // FIXED
+      setIsLoading(false);
     }
   };
 
@@ -395,6 +404,10 @@ export default function InvitationManagerPage() {
       setError('Failed to create outreach record');
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -653,18 +666,6 @@ export default function InvitationManagerPage() {
                   </div>
                 </div>
 
-                {/* <button
-                  onClick={handleGenerateMessage}
-                  disabled={!contactName}
-                  className="
-                    w-full px-4 py-2
-                    bg-gray-600 hover:bg-gray-700
-                    text-white font-medium rounded-lg
-                    transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                  "
-                >
-                  Create Message
-                </button> */}
 
                 {generatedMessage && (
                   <div>
