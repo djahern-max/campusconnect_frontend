@@ -1,4 +1,5 @@
 //src/app/admin/gallery/page.tsx
+//Got Image Upload functionality working in backend nest phase is to implement the frontend.
 'use client';
 
 import { useEffect, useState } from 'react';
