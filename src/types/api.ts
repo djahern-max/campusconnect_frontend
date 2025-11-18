@@ -62,18 +62,6 @@ export interface DisplaySettings {
   primary_color: string | null;
 }
 
-export interface InstitutionImage {
-  id: number;
-  institution_id: number;
-  image_url: string;
-  cdn_url: string;
-  filename: string;
-  caption: string | null;
-  display_order: number;
-  is_featured: boolean;
-  image_type: string | null;
-  created_at: string;
-}
 
 export interface InstitutionVideo {
   id: number;
@@ -253,3 +241,29 @@ export interface Scholarship {
   created_at: string;
   updated_at: string | null;
 }
+
+export interface EntityImage {
+  id: number;
+  entity_type: 'institution' | 'scholarship';
+  entity_id: number;
+  image_url: string;
+  cdn_url: string;
+  filename: string;
+  caption: string | null;
+  display_order: number;
+  is_featured: boolean;
+  image_type: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface ImageReorderRequest {
+  image_ids: number[];
+}
+
+export interface SetFeaturedImageRequest {
+  image_id: number;
+}
+
+// Keep InstitutionImage as an alias for backwards compatibility
+export type InstitutionImage = EntityImage;
