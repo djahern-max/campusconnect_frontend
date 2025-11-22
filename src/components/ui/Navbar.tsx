@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from './Button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export function Navbar() {
@@ -20,7 +20,7 @@ export function Navbar() {
 
   const isSuperAdmin = user?.role === 'super_admin';
 
-  // ✨ NEW: Check token validity on component mount
+  // Check token validity on component mount
   useEffect(() => {
     if (isAuthenticated && !isTokenValid()) {
       // Token expired - clear auth silently
@@ -48,7 +48,6 @@ export function Navbar() {
 
   const authButtonVariant = isAuthenticated ? 'ghost' : 'primary';
 
-  // 🔥 FORCE HOVER EFFECTS (Button component sometimes overrides Tailwind)
   const authButtonExtraClasses = isAuthenticated
     ? `
         border border-gray-300 text-gray-700
@@ -57,9 +56,9 @@ export function Navbar() {
         hover:!shadow-sm hover:!scale-[1.02]
       `
     : `
-        bg-gray-900 text-white shadow-sm 
+        bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-sm 
         transition-all 
-        hover:!bg-gray-800 hover:!shadow-lg hover:!scale-[1.03]
+        hover:!from-blue-700 hover:!to-cyan-700 hover:!shadow-lg hover:!scale-[1.03]
       `;
 
   // Active route detection
@@ -71,8 +70,8 @@ export function Navbar() {
     `
       text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors relative pb-1
       ${isActive(path)
-      ? 'text-gray-900 font-semibold after:content-[""] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-full after:bg-gray-900'
-      : 'after:content-[""] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-gray-900 hover:after:w-full after:transition-all after:duration-150'
+      ? 'text-gray-900 font-semibold after:content-[""] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-full after:bg-gradient-to-r after:from-blue-600 after:to-cyan-600'
+      : 'after:content-[""] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-gradient-to-r after:from-blue-600 after:to-cyan-600 hover:after:w-full after:transition-all after:duration-150'
     }
     `;
 
@@ -81,10 +80,11 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-gray-900">
-              CampusConnect
+          {/* Logo with Sparkle Icon */}
+          <Link href="/" className="flex items-center group">
+            <Sparkles className="h-6 w-6 text-cyan-600 mr-2 group-hover:text-cyan-700 transition-colors" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-cyan-700 transition-all">
+              Abacadaba
             </span>
           </Link>
 
