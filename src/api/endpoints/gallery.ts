@@ -101,6 +101,11 @@ export const deleteGalleryImage = async (imageId: number): Promise<void> => {
  * Reorder gallery images
  */
 export const reorderGallery = async (imageIds: number[]): Promise<void> => {
+  console.log('🔍 Reorder Debug:');
+  console.log('  imageIds:', imageIds);
+  console.log('  imageIds types:', imageIds.map(id => typeof id));
+  console.log('  payload:', { image_ids: imageIds });
+
   await apiClient.put('/admin/gallery/reorder', { image_ids: imageIds });
 };
 

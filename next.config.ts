@@ -1,3 +1,4 @@
+// next.config.ts
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -6,6 +7,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'magicscholar-images.nyc3.cdn.digitaloceanspaces.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'magicscholar-images.nyc3.digitaloceanspaces.com',
         pathname: '/**',
       },
     ],

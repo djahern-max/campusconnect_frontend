@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from './Button';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function Navbar() {
   const router = useRouter();
@@ -14,10 +14,19 @@ export function Navbar() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const isTokenValid = useAuthStore((state) => state.isTokenValid);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthActionLoading, setIsAuthActionLoading] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
+
+  // ✨ NEW: Check token validity on component mount
+  useEffect(() => {
+    if (isAuthenticated && !isTokenValid()) {
+      // Token expired - clear auth silently
+      clearAuth();
+    }
+  }, [isAuthenticated, isTokenValid, clearAuth]);
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
