@@ -11,17 +11,7 @@ export function useLogin() {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authApi.login(email, password),
     onSuccess: async (data) => {
-      // Store token first
-      login(data.access_token, { 
-        id: 0, 
-        email: '', 
-        entity_type: 'institution', 
-        entity_id: 0, 
-        role: '', 
-        is_active: true 
-      });
-      
-      // Then fetch user with new token
+      // Fetch user with the new token and store everything together
       try {
         const user = await authApi.getCurrentUser();
         login(data.access_token, user);
@@ -36,7 +26,7 @@ export function useLogin() {
 export function useCurrentUser() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const token = useAuthStore((state) => state.token);
-  
+
   return useQuery({
     queryKey: ['currentUser'],
     queryFn: authApi.getCurrentUser,
