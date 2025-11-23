@@ -1,9 +1,10 @@
-// src/components/GalleryDiagnostic.tsx
+// src/components/GalleryDiagnostics.tsx
 'use client';
 
 import { useState } from 'react';
+import { API_URL } from '@/config/api';
 
-export default function GalleryDiagnostic() {
+export default function GalleryDiagnostics() {
     const [result, setResult] = useState<string>('');
     const [loading, setLoading] = useState(false);
 
@@ -13,7 +14,7 @@ export default function GalleryDiagnostic() {
 
         try {
             // Test 1: Check if backend is running
-            const response = await fetch('http://localhost:8000/api/v1/admin/gallery', {
+            const response = await fetch(`${API_URL}/api/v1/admin/gallery`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,14 +30,14 @@ export default function GalleryDiagnostic() {
 ✅ Connection Successful!
 Status: ${response.status}
 Data: ${JSON.stringify(data, null, 2)}
-      `);
+            `);
         } catch (error: any) {
             setResult(`
 ❌ Connection Failed!
 Error: ${error.message}
 
 Common issues:
-1. Is your backend running? (http://localhost:8000)
+1. Is your backend running? (Check browser console for API_URL: ${API_URL})
 2. Check CORS settings in backend
 3. Check if you're authenticated
 4. Verify the API endpoint exists in your backend
@@ -44,7 +45,7 @@ Common issues:
 To fix:
 - Start backend: cd campusconnect-backend && source venv/bin/activate && uvicorn app.main:app --reload
 - Check backend logs for errors
-      `);
+            `);
         } finally {
             setLoading(false);
         }
