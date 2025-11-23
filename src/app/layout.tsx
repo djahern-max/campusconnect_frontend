@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+// src/app/layout.tsx for Abacadaba (campusconnect-frontend)
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
@@ -8,22 +9,80 @@ import { Footer } from "@/components/ui/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Abacadaba",
-  description: "The college and scholarship directory powered by institutions. Discover comprehensive information, virtual tours, and funding opportunities.",
-  keywords: ["colleges", "universities", "scholarships", "higher education", "college search", "financial aid"],
-  authors: [{ name: "Abacadaba" }],
+  metadataBase: new URL('https://abacadaba.com'),
+  title: {
+    default: 'Abacadaba - The College & Scholarship Directory',
+    template: '%s | Abacadaba'
+  },
+  description: 'The comprehensive directory where colleges and scholarship providers create rich, accurate pages that students discover. Reach qualified prospects with up-to-date information.',
+  keywords: [
+    'college directory',
+    'scholarship directory',
+    'higher education marketing',
+    'college recruitment',
+    'institutional profiles',
+    'scholarship marketing',
+    'college admissions',
+    'student recruitment'
+  ],
+  authors: [{ name: 'Abacadaba' }],
+  creator: 'Abacadaba',
+  publisher: 'Abacadaba',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
   openGraph: {
-    title: "Abacadaba - College & Scholarship Directory",
-    description: "Discover colleges and scholarships with rich profiles controlled by institutions themselves.",
-    type: "website",
-    locale: "en_US",
-    siteName: "Abacadaba",
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://abacadaba.com',
+    siteName: 'Abacadaba',
+    title: 'Abacadaba - The College & Scholarship Directory',
+    description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Abacadaba - College & Scholarship Directory',
+      }
+    ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Abacadaba - College & Scholarship Directory",
-    description: "Discover colleges and scholarships with rich profiles controlled by institutions themselves.",
+    card: 'summary_large_image',
+    title: 'Abacadaba - The College & Scholarship Directory',
+    description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
+    images: ['/og-image.png'],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#3b82f6',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -33,6 +92,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="canonical" href="https://abacadaba.com" />
+      </head>
       <body className={inter.className}>
         <Providers>
           <div className="flex flex-col min-h-screen">

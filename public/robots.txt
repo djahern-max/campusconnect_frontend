@@ -1,0 +1,15 @@
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Don't index admin pages
+Disallow: /admin
+
+# Allow public institution and scholarship pages
+Allow: /institutions
+Allow: /institutions/*
+Allow: /scholarships
+Allow: /scholarships/*
+
+# Sitemap location
+Sitemap: https://abacadaba.com/sitemap.xml
