@@ -135,7 +135,7 @@ export default function OutreachDashboard() {
       // Fetch stats
       const statsResponse = await fetch(`${API_URL}/api/v1/admin/outreach/stats', {
         headers: {
-          'Authorization': `Bearer ${ token }`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });

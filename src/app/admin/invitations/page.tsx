@@ -157,7 +157,7 @@ export default function InvitationManagerPage() {
 
       const response = await fetch(`${API_URL}/api/v1/admin/auth/invitations', {
         headers: {
-          'Authorization': `Bearer ${ token }`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -305,7 +305,7 @@ const handleGenerateMessage = async () => {
     const response = await fetch(`${API_URL} / api / v1 / admin / outreach', {
         method: 'POST',
       headers: {
-      'Authorization': `Bearer ${ token }`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
       body: JSON.stringify({
