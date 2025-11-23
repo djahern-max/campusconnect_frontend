@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardBody } from '@/components/ui/Card';
 import Link from 'next/link';
 import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { API_URL } from '@/config/api';
 
 interface InvitationValidation {
   valid: boolean;

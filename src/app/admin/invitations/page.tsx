@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Plus, Copy, CheckCircle, Clock, XCircle, Mail, MessageSquare } from 'lucide-react';
+import { API_URL } from '@/config/api';
 
 interface InvitationCode {
   id: number;

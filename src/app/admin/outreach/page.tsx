@@ -1,3 +1,4 @@
+//src/app/admin/outreach/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,6 +22,7 @@ import {
   Plus
 } from 'lucide-react';
 import apiClient from '@/api/client';
+import { API_URL } from '@/config/api';
 
 interface OutreachStats {
   total_entities: number;

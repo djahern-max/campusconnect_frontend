@@ -14,8 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { API_URL } from '@/config/api';
 
 // Featured image with entity info
 interface FeaturedSlide {
