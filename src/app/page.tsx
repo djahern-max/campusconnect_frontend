@@ -10,8 +10,7 @@ import {
   DollarSign,
   ArrowRight,
   ChevronLeft,
-  ChevronRight,
-  Sparkles
+  ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 import axios from 'axios';
@@ -123,38 +122,20 @@ export default function HomePage() {
   if (featuredSlides.length === 0) {
     return (
       <div>
-        <section className="relative h-[700px] bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-900 overflow-hidden">
-          {/* Decorative background pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-              backgroundSize: '40px 40px'
-            }} />
-          </div>
-
-          {/* Floating sparkles decoration */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <Sparkles className="absolute top-20 left-10 h-6 w-6 text-cyan-300 opacity-50 animate-pulse" />
-            <Sparkles className="absolute top-40 right-20 h-8 w-8 text-blue-300 opacity-30 animate-pulse" style={{ animationDelay: '1s' }} />
-            <Sparkles className="absolute bottom-32 left-1/4 h-5 w-5 text-cyan-400 opacity-40 animate-pulse" style={{ animationDelay: '2s' }} />
-          </div>
-
+        <section className="relative h-[700px] bg-gray-900 overflow-hidden">
           <div className="relative h-full flex flex-col justify-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
               <div className="text-white">
-                <div className="flex items-center justify-center mb-6">
-                  <Sparkles className="h-12 w-12 text-cyan-400 mr-4" />
-                  <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold">
-                    Abacadaba
-                  </h1>
-                </div>
-                <p className="text-2xl sm:text-3xl text-cyan-100 mb-4 font-semibold">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
+                  Abacadaba
+                </h1>
+                <p className="text-2xl sm:text-3xl text-gray-300 mb-4 font-semibold">
                   The College & Scholarship Directory
                 </p>
-                <p className="text-xl text-gray-200 mb-4">
+                <p className="text-xl text-gray-400 mb-4">
                   Explore 609 institutions and 126 scholarships
                 </p>
-                <p className="text-lg text-gray-300 mb-8">
+                <p className="text-lg text-gray-500 mb-8">
                   Comprehensive information, virtual tours, and funding opportunities
                 </p>
 
@@ -163,7 +144,7 @@ export default function HomePage() {
                     <Button
                       variant="primary"
                       size="lg"
-                      className="w-full sm:w-auto bg-white !text-blue-900 hover:bg-gray-100 shadow-lg"
+                      className="w-full sm:w-auto bg-white !text-gray-900 hover:bg-gray-100 shadow-lg"
                     >
                       <Search className="mr-2 h-5 w-5" />
                       Explore Institutions
@@ -173,7 +154,7 @@ export default function HomePage() {
                     <Button
                       variant="secondary"
                       size="lg"
-                      className="w-full sm:w-auto bg-white/90 !text-blue-900 border-2 border-white hover:bg-white shadow-lg"
+                      className="w-full sm:w-auto bg-white/90 !text-gray-900 border-2 border-white hover:bg-white shadow-lg"
                     >
                       <DollarSign className="mr-2 h-5 w-5" />
                       Find Scholarships
@@ -338,55 +319,8 @@ export default function HomePage() {
 function RestOfPageContent() {
   return (
     <>
-      {/* Free Platform Message */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Free for Students, Forever
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Abacadaba is completely free for students and families. We help you
-            discover and explore institutions and scholarships across the United
-            States—no hidden fees, no subscriptions.
-          </p>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Explore comprehensive information about colleges and funding
-              opportunities
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={<GraduationCap className="h-12 w-12 text-blue-600" />}
-              title="609 Institutions"
-              description="Browse detailed profiles of colleges and universities across all 50 states, with photos, videos, and comprehensive information."
-            />
-            <FeatureCard
-              icon={<DollarSign className="h-12 w-12 text-cyan-600" />}
-              title="126 Scholarships"
-              description="Discover verified scholarships with detailed requirements, deadlines, and application information."
-            />
-            <FeatureCard
-              icon={<Sparkles className="h-12 w-12 text-blue-600" />}
-              title="Rich Content"
-              description="Virtual campus tours, image galleries, videos, and authentic insights from institutions themselves."
-            />
-          </div>
-        </div>
-      </section>
-
       {/* Stats Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <StatCard number="609" label="Institutions" />
@@ -396,43 +330,37 @@ function RestOfPageContent() {
           </div>
         </div>
       </section>
-
       {/* For Institutions CTA */}
-      <section className="py-20 bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-900 text-white relative overflow-hidden">
-        {/* Decorative sparkles */}
-        <div className="absolute inset-0 pointer-events-none">
-          <Sparkles className="absolute top-10 right-10 h-8 w-8 text-cyan-300 opacity-30 animate-pulse" />
-          <Sparkles className="absolute bottom-10 left-10 h-6 w-6 text-blue-300 opacity-40 animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             For Institutions &amp; Scholarships
           </h2>
-          <p className="text-xl text-cyan-100 mb-8">
+          <p className="text-xl text-gray-700 mb-8">
             Create a rich, customizable page for your institution or scholarship.
             Showcase your campus with galleries, videos, and detailed information that
             helps students make informed decisions.
           </p>
           <div className="space-y-4">
-            <p className="text-lg text-cyan-200">
+            <p className="text-lg text-gray-600">
               Interested in listing your institution or scholarship?
             </p>
             <Link href="/contact">
               <Button
                 variant="primary"
                 size="lg"
-                className="bg-white hover:bg-gray-100 !text-blue-900 shadow-lg"
+                className="bg-gray-900 hover:bg-gray-800 !text-white shadow-lg"
               >
                 Contact Us
               </Button>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-cyan-200">
+          <p className="mt-6 text-sm text-gray-600">
             Page customization available • 30-day free trial
           </p>
         </div>
       </section>
+
     </>
   );
 }
@@ -447,7 +375,7 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="bg-white p-8 rounded-lg border border-gray-200 hover:border-blue-300 transition-all hover:shadow-lg">
+    <div className="bg-white p-8 rounded-lg border border-gray-200 hover:border-gray-400 transition-all hover:shadow-lg">
       <div className="mb-4">{icon}</div>
       <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
       <p className="text-gray-600 leading-relaxed">{description}</p>
@@ -458,7 +386,7 @@ function FeatureCard({
 function StatCard({ number, label }: { number: string; label: string }) {
   return (
     <div>
-      <div className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+      <div className="text-5xl font-bold text-gray-900 mb-2">
         {number}
       </div>
       <div className="text-gray-600 text-lg">{label}</div>
