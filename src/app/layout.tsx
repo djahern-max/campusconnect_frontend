@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/opengraph-image.png',  // ← This is the key change
         width: 1200,
         height: 630,
         alt: 'Abacadaba - College & Scholarship Directory',

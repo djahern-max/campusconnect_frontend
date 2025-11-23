@@ -1,16 +1,15 @@
-// app/opengraph-image.tsx for Abacadaba (abacadaba.com)
+// src/app/opengraph-image.tsx
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-
+export const alt = 'Abacadaba - The College & Scholarship Directory';
 export const size = {
     width: 1200,
     height: 630,
 };
-
 export const contentType = 'image/png';
 
-export default function OGImage() {
+export default async function Image() {
     return new ImageResponse(
         (
             <div
@@ -23,8 +22,7 @@ export default function OGImage() {
                     padding: '64px 96px',
                     backgroundColor: '#ffffff',
                     color: '#111827',
-                    fontFamily:
-                        'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 }}
             >
                 {/* Top: brand with sparkle */}
@@ -41,7 +39,7 @@ export default function OGImage() {
                         style={{
                             width: 48,
                             height: 48,
-                            borderRadius: '9999px',
+                            borderRadius: 9999,
                             border: '2px solid #3b82f6',
                             display: 'flex',
                             alignItems: 'center',
@@ -54,7 +52,7 @@ export default function OGImage() {
                     <span style={{ fontWeight: 700, color: '#111827' }}>Abacadaba</span>
                 </div>
 
-                {/* Middle: main message with A/B/C/D */}
+                {/* Middle: main message */}
                 <div>
                     <div
                         style={{
@@ -68,29 +66,19 @@ export default function OGImage() {
                         The College &amp; Scholarship Directory
                     </div>
 
-                    {/* A/B/C/D visual element */}
+                    {/* A/B/C/D visual */}
                     <div
                         style={{
                             display: 'flex',
-                            alignItems: 'baseline',
+                            alignItems: 'flex-end',
                             gap: 12,
-                            fontSize: 48,
-                            color: '#6b7280',
                         }}
                     >
-                        <span style={{ fontSize: 80, fontWeight: 800, color: '#111827' }}>
-                            A
-                        </span>
-                        <span style={{ fontSize: 48, fontWeight: 700 }}>B</span>
-                        <span style={{ fontSize: 40, fontWeight: 600, opacity: 0.8 }}>
-                            C
-                        </span>
-                        <span style={{ fontSize: 32, fontWeight: 600, opacity: 0.6 }}>
-                            D
-                        </span>
-                        <span style={{ fontSize: 32, color: '#111827', marginLeft: 8 }}>
-                            — No more guessing.
-                        </span>
+                        <span style={{ fontSize: 80, fontWeight: 800, color: '#111827' }}>A</span>
+                        <span style={{ fontSize: 48, fontWeight: 700, color: '#6b7280' }}>B</span>
+                        <span style={{ fontSize: 40, fontWeight: 600, color: '#9ca3af', opacity: 0.8 }}>C</span>
+                        <span style={{ fontSize: 32, fontWeight: 600, color: '#9ca3af', opacity: 0.6 }}>D</span>
+                        <span style={{ fontSize: 32, color: '#111827', marginLeft: 8 }}>— No more guessing.</span>
                     </div>
                 </div>
 
@@ -103,8 +91,7 @@ export default function OGImage() {
                         lineHeight: 1.4,
                     }}
                 >
-                    Where institutions create rich, accurate pages that students discover
-                    through MagicScholar.
+                    Where institutions create rich, accurate pages that students discover through MagicScholar.
                 </div>
             </div>
         ),
