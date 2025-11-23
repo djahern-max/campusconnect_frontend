@@ -315,35 +315,45 @@ export default function HomePage() {
   );
 }
 
-// Extracted common page content
 function RestOfPageContent() {
   return (
     <>
-      {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <StatCard number="609" label="Institutions" />
-            <StatCard number="126" label="Scholarships" />
-            <StatCard number="50" label="States Covered" />
-            <StatCard number="100%" label="Free for Students" />
-          </div>
-        </div>
-      </section>
-      {/* For Institutions CTA */}
-      <section className="py-20 bg-gray-100">
+      {/* Slogan + Institutions CTA */}
+      <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            For Institutions &amp; Scholarships
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            Create a rich, customizable page for your institution or scholarship.
-            Showcase your campus with galleries, videos, and detailed information that
-            helps students make informed decisions.
+
+          {/* Main slogan */}
+          <p className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">
+            Because choosing a college shouldn&apos;t be{' '}
+            <span className="inline-flex items-baseline gap-2">
+              <span className="text-5xl sm:text-6xl font-bold text-gray-900 leading-none">
+                A
+              </span>
+              <span className="flex items-end gap-1 text-gray-500">
+                <span className="text-2xl sm:text-3xl font-medium">B</span>
+                <span className="text-xl sm:text-2xl font-medium opacity-80">
+                  C
+                </span>
+                <span className="text-lg sm:text-xl font-medium opacity-60">
+                  D
+                </span>
+              </span>
+              <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900">
+                guess.
+              </span>
+            </span>
           </p>
+
+          {/* Short supporting line */}
+          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto mb-10">
+            Abacadaba helps students compare colleges and scholarships with real
+            information—so their next move is a decision, not a guess.
+          </p>
+
+          {/* CTA */}
           <div className="space-y-4">
-            <p className="text-lg text-gray-600">
-              Interested in listing your institution or scholarship?
+            <p className="text-sm sm:text-base text-gray-600">
+              Represent a college or scholarship?
             </p>
             <Link href="/contact">
               <Button
@@ -351,19 +361,16 @@ function RestOfPageContent() {
                 size="lg"
                 className="bg-gray-900 hover:bg-gray-800 !text-white shadow-lg"
               >
-                Contact Us
+                List Your Institution
               </Button>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-gray-600">
-            Page customization available • 30-day free trial
-          </p>
         </div>
       </section>
-
     </>
   );
 }
+
 
 function FeatureCard({
   icon,

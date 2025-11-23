@@ -76,16 +76,31 @@ export function Navbar() {
     `;
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-
-          {/* Logo with Sparkle Icon */}
-          <Link href="/" className="flex items-center group">
-            <Sparkles className="h-6 w-6 text-gray-700 mr-2 group-hover:text-gray-900 transition-colors" />
-            <span className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">
-              Abacadaba
+          {/* Logo / Brand */}
+          <Link href="/" className="flex items-center group space-x-2">
+            {/* Subtle sparkle */}
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white">
+              <Sparkles
+                className="h-4 w-4 text-gray-400 transition-transform group-hover:rotate-12 group-hover:text-gray-700"
+                aria-hidden="true"
+              />
             </span>
+
+            {/* Wordmark + tiny tagline */}
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold tracking-tight text-gray-900">
+                <span className="text-2xl sm:text-[1.6rem] mr-0.5 align-baseline">
+                  A
+                </span>
+                <span className="text-xl sm:text-2xl text-gray-800">
+                  bacadaba
+                </span>
+              </span>
+
+            </div>
           </Link>
 
           {/* Desktop Nav */}
@@ -160,9 +175,8 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
+        <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-sm">
           <div className="px-4 py-4 space-y-3">
-
             <Link
               href="/institutions"
               className={`block py-2 text-sm ${isActive('/institutions')
@@ -242,7 +256,6 @@ export function Navbar() {
             >
               {authButtonLabel}
             </Button>
-
           </div>
         </div>
       )}
