@@ -103,8 +103,8 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Nav - now shows at 2xl breakpoint (1536px+) */}
+          <div className="hidden 2xl:flex items-center space-x-8">
             <Link href="/institutions" className={linkClass('/institutions')}>
               Institutions
             </Link>
@@ -160,10 +160,10 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Toggle */}
+          {/* Mobile Toggle - now shows until 2xl breakpoint */}
           <button
             type="button"
-            className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+            className="2xl:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
             onClick={() => setMobileMenuOpen((o) => !o)}
             aria-label="Toggle navigation menu"
             aria-expanded={mobileMenuOpen}
@@ -173,9 +173,9 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - now shows until 2xl breakpoint */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-sm">
+        <div className="2xl:hidden border-t border-gray-200 bg-white/95 backdrop-blur-sm">
           <div className="px-4 py-4 space-y-3">
             <Link
               href="/institutions"
