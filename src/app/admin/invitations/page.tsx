@@ -177,7 +177,7 @@ export default function InvitationManagerPage() {
     try {
       if (type === 'institution') {
         const response = await fetch(
-          `${API_URL}/api/v1/institutions/${id}`
+          `${API_URL}/api/v1/institutions/by-id/${id}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -770,8 +770,8 @@ export default function InvitationManagerPage() {
                             )
                           }
                           className={`p-3 rounded-lg border-2 text-left transition-colors ${selectedTemplate === key
-                              ? 'border-gray-600 bg-gray-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-gray-600 bg-gray-50'
+                            : 'border-gray-200 hover:border-gray-300'
                             }`}
                         >
                           {key.startsWith('email') ? (

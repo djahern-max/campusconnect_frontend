@@ -676,10 +676,10 @@ function OutreachDetailModal({
                   <span className="text-gray-600">Status:</span>
                   <span
                     className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${record.status === 'contacted'
-                        ? 'bg-blue-100 text-blue-800'
-                        : record.status === 'registered'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                      ? 'bg-blue-100 text-blue-800'
+                      : record.status === 'registered'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
                       }`}
                   >
                     {record.status.replace('_', ' ')}
@@ -715,10 +715,10 @@ function OutreachDetailModal({
                   <span className="text-gray-600">Priority:</span>
                   <span
                     className={`ml-2 font-medium ${record.priority === 'high'
-                        ? 'text-red-600'
-                        : record.priority === 'low'
-                          ? 'text-gray-500'
-                          : 'text-blue-600'
+                      ? 'text-red-600'
+                      : record.priority === 'low'
+                        ? 'text-gray-500'
+                        : 'text-blue-600'
                       }`}
                   >
                     {record.priority}
