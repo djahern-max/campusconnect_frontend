@@ -1,3 +1,4 @@
+//src/app/institutions/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -155,8 +156,8 @@ export default function InstitutionsPage() {
 
                         <div className="mt-3">
                           <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-purple-100 text-purple-800'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
                             }`}>
                             {institution.control_type.replace('_', ' ')}
                           </span>
