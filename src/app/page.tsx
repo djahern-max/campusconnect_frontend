@@ -97,7 +97,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div>
-        <section className="relative h-[700px] bg-gray-900 overflow-hidden">
+        <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black animate-pulse" />
           <div className="relative h-full flex flex-col justify-end pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -121,20 +121,20 @@ export default function HomePage() {
   if (featuredSlides.length === 0) {
     return (
       <div>
-        <section className="relative h-[700px] bg-gray-900 overflow-hidden">
+        <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
           <div className="relative h-full flex flex-col justify-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
               <div className="text-white">
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                   Abacadaba
                 </h1>
-                <p className="text-2xl sm:text-3xl text-gray-300 mb-4 font-semibold">
+                <p className="text-2xl sm:text-3xl text-gray-300 mb-4 font-semibold drop-shadow-lg">
                   The College & Scholarship Directory
                 </p>
-                <p className="text-xl text-gray-400 mb-4">
+                <p className="text-xl text-gray-400 mb-4 drop-shadow-lg">
                   Explore 609 institutions and 126 scholarships
                 </p>
-                <p className="text-lg text-gray-500 mb-8">
+                <p className="text-lg text-gray-500 mb-8 drop-shadow-lg">
                   Comprehensive information, virtual tours, and funding opportunities
                 </p>
 
@@ -175,7 +175,7 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section with Featured Image Carousel */}
-      <section className="relative h-[700px] bg-gray-900 overflow-hidden">
+      <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
         {/* Carousel Images */}
         <div className="absolute inset-0">
           {featuredSlides.map((slide, index) => (
@@ -189,21 +189,21 @@ export default function HomePage() {
                 alt={slide.caption || slide.entity_name}
                 fill
                 className="object-cover"
-                priority={index === 0}
-                quality={85}
+                priority={index < 3}
+                quality={95}
                 sizes="100vw"
               />
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+              {/* Lightened overlay gradient for better image visibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             </div>
           ))}
         </div>
 
         {/* Content Overlay */}
-        <div className="relative h-full flex flex-col justify-end pb-16">
+        <div className="relative h-full flex flex-col justify-end pb-12 md:pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="text-white">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                 Find Your Perfect College
               </h1>
 
@@ -217,47 +217,50 @@ export default function HomePage() {
                     }
                     className="group inline-block"
                   >
-                    <p className="text-xl sm:text-2xl text-gray-200 mb-2 group-hover:text-white transition-colors">
+                    <p className="text-xl sm:text-2xl text-gray-200 mb-2 group-hover:text-white transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                       {activeSlide.entity_name}
                       <ArrowRight className="inline-block ml-2 h-6 w-6 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     </p>
                   </Link>
 
                   {activeSlide.entity_city && activeSlide.entity_state && (
-                    <p className="text-lg text-gray-300 mb-2">
+                    <p className="text-lg text-gray-300 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                       {activeSlide.entity_city}, {activeSlide.entity_state}
                     </p>
                   )}
 
                   {activeSlide.caption && (
-                    <p className="text-md text-gray-400 italic max-w-2xl">
+                    <p className="text-md text-gray-400 italic max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                       "{activeSlide.caption}"
                     </p>
                   )}
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/institutions">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-lg"
-                  >
-                    <Search className="mr-2 h-5 w-5 text-black" />
-                    Explore Institutions
-                  </Button>
-                </Link>
-                <Link href="/scholarships">
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="w-full sm:w-auto bg-white/90 !text-black border-2 border-white hover:bg-white shadow-lg"
-                  >
-                    <DollarSign className="mr-2 h-5 w-5 text-black" />
-                    Find Scholarships
-                  </Button>
-                </Link>
+              {/* Buttons with backdrop for better visibility */}
+              <div className="inline-block bg-black/30 backdrop-blur-sm p-4 sm:p-6 rounded-xl">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link href="/institutions">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-lg"
+                    >
+                      <Search className="mr-2 h-5 w-5 text-black" />
+                      Explore Institutions
+                    </Button>
+                  </Link>
+                  <Link href="/scholarships">
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="w-full sm:w-auto bg-white/90 !text-black border-2 border-white hover:bg-white shadow-lg"
+                    >
+                      <DollarSign className="mr-2 h-5 w-5 text-black" />
+                      Find Scholarships
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -266,17 +269,17 @@ export default function HomePage() {
         {/* Carousel Controls - Only show if multiple slides */}
         {featuredSlides.length > 1 && (
           <>
-            {/* Previous/Next Buttons */}
+            {/* Previous/Next Buttons - more visible */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
               aria-label="Previous slide"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
               aria-label="Next slide"
             >
               <ChevronRight className="h-6 w-6" />
@@ -292,8 +295,8 @@ export default function HomePage() {
                     setIsAutoPlaying(false);
                   }}
                   className={`h-2 rounded-full transition-all ${index === currentSlide
-                    ? 'bg-white w-8'
-                    : 'bg-white/50 hover:bg-white/75 w-2'
+                      ? 'bg-white w-8'
+                      : 'bg-white/50 hover:bg-white/75 w-2'
                     }`}
                   aria-label={`Go to slide ${index + 1}`}
                   aria-current={index === currentSlide ? 'true' : undefined}
@@ -301,8 +304,8 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Image Counter */}
-            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-medium">
+            {/* Image Counter - more prominent */}
+            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-base font-semibold shadow-lg">
               {currentSlide + 1} / {featuredSlides.length}
             </div>
           </>
@@ -320,7 +323,6 @@ function RestOfPageContent() {
       {/* Slogan + Institutions CTA */}
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-
           {/* Main slogan */}
           <p className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">
             Because choosing a college shouldn&apos;t be{' '}
@@ -370,7 +372,6 @@ function RestOfPageContent() {
   );
 }
 
-
 function FeatureCard({
   icon,
   title,
@@ -392,9 +393,7 @@ function FeatureCard({
 function StatCard({ number, label }: { number: string; label: string }) {
   return (
     <div>
-      <div className="text-5xl font-bold text-gray-900 mb-2">
-        {number}
-      </div>
+      <div className="text-5xl font-bold text-gray-900 mb-2">{number}</div>
       <div className="text-gray-600 text-lg">{label}</div>
     </div>
   );

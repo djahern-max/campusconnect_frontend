@@ -18,8 +18,8 @@ export function Footer() {
             {/* Brand */}
             <div>
               <div className="flex items-center mb-4 space-x-2 group">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-yellow-400 bg-gray-900">
-                  <Sparkles className="h-4 w-4 text-yellow-400 transition-transform group-hover:rotate-12 group-hover:text-yellow-300" />
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-700 bg-gray-900">
+                  <Sparkles className="h-4 w-4 text-gray-300 transition-transform group-hover:rotate-12 group-hover:text-white" />
                 </span>
 
                 <h3 className="text-xl font-semibold tracking-tight text-white">

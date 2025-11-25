@@ -82,12 +82,13 @@ export function Navbar() {
           {/* Logo / Brand */}
           <Link href="/" className="flex items-center group space-x-2">
             {/* Subtle sparkle */}
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-yellow-200 bg-white">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white">
               <Sparkles
-                className="h-4 w-4 text-yellow-500 transition-transform group-hover:rotate-12 group-hover:text-yellow-600"
+                className="h-4 w-4 text-gray-600 transition-transform group-hover:rotate-12 group-hover:text-gray-800"
                 aria-hidden="true"
               />
             </span>
+
 
             {/* Wordmark + tiny tagline */}
             <div className="flex flex-col leading-tight">
