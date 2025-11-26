@@ -1,4 +1,4 @@
-// src/api/endpoints/institutionData.ts
+// src/api/endpoints/institutionDataAPI.ts
 import { apiClient } from '../client';
 
 export interface InstitutionDataQuality {
@@ -65,42 +65,49 @@ export interface VerifyCurrentResponse {
 
 export const institutionDataApi = {
     // Get current institution data
+    // Endpoint: GET /api/v1/admin/institution-data/{institution_id}
     getInstitutionData: async (institutionId: number) => {
         const response = await apiClient.get(`/admin/institution-data/${institutionId}`);
         return response.data;
     },
 
     // Get data quality report
+    // Endpoint: GET /api/v1/admin/institution-data/{institution_id}/quality
     getDataQuality: async (institutionId: number): Promise<InstitutionDataQuality> => {
         const response = await apiClient.get(`/admin/institution-data/${institutionId}/quality`);
         return response.data;
     },
 
     // Update basic info
+    // Endpoint: PUT /api/v1/admin/institution-data/{institution_id}/basic-info
     updateBasicInfo: async (institutionId: number, data: InstitutionBasicInfoUpdate) => {
         const response = await apiClient.put(`/admin/institution-data/${institutionId}/basic-info`, data);
         return response.data;
     },
 
     // Update cost data
+    // Endpoint: PUT /api/v1/admin/institution-data/{institution_id}/cost-data
     updateCostData: async (institutionId: number, data: InstitutionCostDataUpdate) => {
         const response = await apiClient.put(`/admin/institution-data/${institutionId}/cost-data`, data);
         return response.data;
     },
 
     // Update admissions data
+    // Endpoint: PUT /api/v1/admin/institution-data/{institution_id}/admissions-data
     updateAdmissionsData: async (institutionId: number, data: InstitutionAdmissionsDataUpdate) => {
         const response = await apiClient.put(`/admin/institution-data/${institutionId}/admissions-data`, data);
         return response.data;
     },
 
     // Verify current data
+    // Endpoint: POST /api/v1/admin/institution-data/{institution_id}/verify-current
     verifyCurrent: async (institutionId: number, data: VerifyCurrentRequest): Promise<VerifyCurrentResponse> => {
         const response = await apiClient.post(`/admin/institution-data/${institutionId}/verify-current`, data);
         return response.data;
     },
 
     // Get verification history
+    // Endpoint: GET /api/v1/admin/institution-data/{institution_id}/verification-history
     getVerificationHistory: async (institutionId: number, limit?: number): Promise<VerificationRecord[]> => {
         const params = limit ? { limit } : {};
         const response = await apiClient.get(`/admin/institution-data/${institutionId}/verification-history`, { params });

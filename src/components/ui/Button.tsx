@@ -1,3 +1,4 @@
+// src/components/ui/Button.tsx
 import { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -18,9 +19,9 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-  
+
   const variants = {
-    primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500',
+    primary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',  // ✅ Changed to gray
     secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
     accent: 'bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-500',
     danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
@@ -29,8 +30,8 @@ export function Button({
 
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    md: 'px-4 py-2 text-sm',  // ✅ Changed to text-sm for consistency
+    lg: 'px-6 py-3 text-base',
   };
 
   return (

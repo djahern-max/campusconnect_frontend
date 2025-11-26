@@ -1,10 +1,11 @@
-//src/app/admin/dashboard/page.tsx
+// src/app/admin/dashboard/page.tsx
 'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/useAuth';
+import { useInstitutionDataQuality } from '@/hooks/useInstitutionData'; // ✅ Add this import
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
@@ -24,6 +25,10 @@ export default function AdminDashboard() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const { data: currentUser } = useCurrentUser();
+
+  // ✅ Get institution data
+  const institutionId = user?.entity_type === 'institution' ? user.entity_id : null;
+  const { quality, loading: loadingQuality } = useInstitutionDataQuality(institutionId);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -52,10 +57,18 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
             <p className="text-gray-600">
-              Welcome back, {user?.email}
+              {/* ✅ Show institution name if available, otherwise show email */}
+              {loadingQuality ? (
+                'Loading...'
+              ) : quality?.institution_name ? (
+                <><span className="font-semibold">{quality.institution_name}</span></>
+              ) : (
+                `Welcome back, ${user?.email}`
+              )}
             </p>
           </div>
 
+          {/* Rest of your dashboard... */}
           {/* Quick Stats */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <StatCard
@@ -73,17 +86,30 @@ export default function AdminDashboard() {
               value="0"
               icon={<TrendingUp className="h-8 w-8 text-success-600" />}
             />
-            {/* Replaced with SubscriptionCard */}
             <SubscriptionCard onUpgradeClick={handleUpgradeClick} />
           </div>
 
           {/* Quick Actions */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
+              <ActionCard
+                title="Data Quality"
+                description="View your completeness score and improve data"
+                icon={<TrendingUp className="h-6 w-6" />}
+                href="/admin/data-quality"
+                color="primary"
+              />
+              <ActionCard
+                title="Edit Data"
+                description="Update tuition, admissions, and basic info"
+                icon={<FileText className="h-6 w-6" />}
+                href="/admin/edit-data"
+                color="success"
+              />
               <ActionCard
                 title="Manage Gallery"
-                description="Upload and organize your campus photos"
+                description="Upload and organize campus photos"
                 icon={<ImageIcon className="h-6 w-6" />}
                 href="/admin/gallery"
                 color="primary"
@@ -94,13 +120,6 @@ export default function AdminDashboard() {
                 icon={<Video className="h-6 w-6" />}
                 href="/admin/videos"
                 color="accent"
-              />
-              <ActionCard
-                title="Edit Content"
-                description="Update your institution information"
-                icon={<FileText className="h-6 w-6" />}
-                href="/admin/content"
-                color="success"
               />
             </div>
           </div>
@@ -151,6 +170,7 @@ export default function AdminDashboard() {
   );
 }
 
+// Rest of your components...
 function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
   return (
     <Card>

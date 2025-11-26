@@ -8,6 +8,7 @@ export function useInstitutionDataQuality(institutionId: number | null) {
     const [error, setError] = useState<string | null>(null);
 
     const fetchQuality = async () => {
+        // Still check if institutionId exists to know if user is an institution admin
         if (!institutionId) {
             setLoading(false);
             return;
@@ -16,6 +17,7 @@ export function useInstitutionDataQuality(institutionId: number | null) {
         try {
             setLoading(true);
             setError(null);
+            // ✅ Remove institutionId parameter - backend gets it from auth token
             const data = await institutionDataApi.getDataQuality(institutionId);
             setQuality(data);
         } catch (err: any) {
