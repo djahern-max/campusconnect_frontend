@@ -1,14 +1,12 @@
-//src/app/institutions/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { useInstitutions } from '@/hooks/useInstitutions';
+import { useState, useEffect } from 'react';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Users, Search } from 'lucide-react';
+import { MapPin, Users, Search, Loader2 } from 'lucide-react';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -18,15 +16,112 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
+const ITEMS_PER_PAGE = 24; // Show 24 institutions per page (8 rows of 3)
+
+interface Institution {
+  id: number;
+  ipeds_id: number;
+  name: string;
+  city: string;
+  state: string;
+  control_type?: string;
+  primary_image_url?: string;
+  student_faculty_ratio?: number;
+  size_category?: string;
+  data_completeness_score: number;
+  is_featured?: boolean;
+  tuition_in_state?: number;
+  tuition_out_of_state?: number;
+  acceptance_rate?: number;
+}
+
 export default function InstitutionsPage() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: institutions, isLoading, error } = useInstitutions(selectedState || undefined);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  const filteredInstitutions = institutions?.filter(inst =>
-    inst.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inst.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch institutions
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      setIsLoading(true);
+      setError(null);
+      setDisplayedCount(ITEMS_PER_PAGE);
+
+      try {
+        let allInstitutions: Institution[] = [];
+        let offset = 0;
+        const limit = 500;
+        let hasMoreData = true;
+
+        // Fetch all institutions (still needed for accurate total count and filtering)
+        while (hasMoreData) {
+          const params = new URLSearchParams({
+            limit: limit.toString(),
+            offset: offset.toString(),
+            min_completeness: '0',
+          });
+
+          if (selectedState) {
+            params.append('state', selectedState);
+          }
+
+          if (searchTerm) {
+            params.append('query_text', searchTerm);
+          }
+
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || 'https://abacadaba.com'}/api/v1/institutions/search/filtered?${params}`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch institutions');
+          }
+
+          const data = await response.json();
+          allInstitutions = [...allInstitutions, ...data];
+
+          if (data.length < limit) {
+            hasMoreData = false;
+          } else {
+            offset += limit;
+          }
+        }
+
+        setInstitutions(allInstitutions);
+        setHasMore(allInstitutions.length > ITEMS_PER_PAGE);
+      } catch (err) {
+        console.error('Error fetching institutions:', err);
+        setError('Failed to load institutions. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, [selectedState, searchTerm]);
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      const newCount = displayedCount + ITEMS_PER_PAGE;
+      setDisplayedCount(newCount);
+      setHasMore(newCount < institutions.length);
+      setIsLoadingMore(false);
+    }, 300); // Small delay for better UX
+  };
+
+  const displayedInstitutions = institutions.slice(0, displayedCount);
+  const totalCount = institutions.length;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -37,7 +132,7 @@ export default function InstitutionsPage() {
             Explore Institutions
           </h1>
           <p className="text-lg text-gray-600">
-            Browse {institutions?.length || 609} colleges and universities
+            Browse {totalCount.toLocaleString()} colleges and universities
           </p>
         </div>
 
@@ -99,25 +194,25 @@ export default function InstitutionsPage() {
         {/* Results */}
         {isLoading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-            <p className="mt-4 text-gray-600">Loading institutions...</p>
+            <Loader2 className="inline-block animate-spin h-12 w-12 text-primary-600 mb-4" />
+            <p className="text-gray-600">Loading institutions...</p>
           </div>
         )}
 
         {error && (
           <div className="text-center py-12">
-            <p className="text-red-600">Error loading institutions. Please try again.</p>
+            <p className="text-red-600">{error}</p>
           </div>
         )}
 
-        {filteredInstitutions && (
+        {!isLoading && !error && institutions.length > 0 && (
           <>
             <div className="mb-4 text-gray-600">
-              Showing {filteredInstitutions.length} institution{filteredInstitutions.length !== 1 ? 's' : ''}
+              Showing {displayedInstitutions.length.toLocaleString()} of {totalCount.toLocaleString()} institution{totalCount !== 1 ? 's' : ''}
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredInstitutions.map((institution) => (
+              {displayedInstitutions.map((institution) => (
                 <Link
                   key={institution.ipeds_id}
                   href={`/institutions/${institution.ipeds_id}`}
@@ -154,12 +249,28 @@ export default function InstitutionsPage() {
                           </div>
                         )}
 
-                        <div className="mt-3">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
+                        <div className="mt-3 flex items-center justify-between">
+                          {institution.control_type && (
+                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
+                                ? 'bg-blue-100 text-blue-800'
+                                : institution.control_type === 'PRIVATE_NONPROFIT'
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                              {institution.control_type ? institution.control_type.replace(/_/g, ' ') : 'N/A'}
+                            </span>
+                          )}
+
+                          {/* Show completeness score as a badge */}
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
+                              ? 'bg-green-100 text-green-800'
+                              : institution.data_completeness_score >= 60
+                                ? 'bg-blue-100 text-blue-800'
+                                : institution.data_completeness_score >= 40
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-gray-100 text-gray-800'
                             }`}>
-                            {institution.control_type.replace('_', ' ')}
+                            {institution.data_completeness_score}% Complete
                           </span>
                         </div>
                       </div>
@@ -168,10 +279,50 @@ export default function InstitutionsPage() {
                 </Link>
               ))}
             </div>
+
+            {/* Load More Button */}
+            {hasMore && !isLoading && (
+              <div className="mt-8 flex justify-center">
+                <Button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  size="lg"
+                  className="min-w-[200px]"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      Load More
+                      <span className="ml-2 text-sm opacity-75">
+                        ({Math.min(ITEMS_PER_PAGE, totalCount - displayedCount)} more)
+                      </span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* End message */}
+            {!hasMore && displayedCount > ITEMS_PER_PAGE && (
+              <div className="mt-8 text-center text-gray-600">
+                <p>You've reached the end of the results</p>
+                <Button
+                  variant="ghost"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="mt-2"
+                >
+                  Back to Top ↑
+                </Button>
+              </div>
+            )}
           </>
         )}
 
-        {filteredInstitutions && filteredInstitutions.length === 0 && (
+        {!isLoading && !error && institutions.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-600">No institutions found matching your criteria.</p>
             <Button
