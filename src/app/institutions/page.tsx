@@ -227,6 +227,7 @@ export default function InstitutionsPage() {
                           fill
                           className="object-cover rounded-t-lg"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          unoptimized
                         />
                       </div>
                     )}
