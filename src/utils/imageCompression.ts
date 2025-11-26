@@ -105,8 +105,9 @@ export async function validateImage(file: File): Promise<ValidationResult> {
         const dimensions = await getImageDimensions(file);
 
         // Check minimum dimensions (prevent tiny images)
+        // Allow landscape photos - reduced height requirement for wide banners
         const MIN_WIDTH = 800;
-        const MIN_HEIGHT = 600;
+        const MIN_HEIGHT = 400; // Reduced from 600 to allow wide landscape photos
 
         if (dimensions.width < MIN_WIDTH || dimensions.height < MIN_HEIGHT) {
             return {
