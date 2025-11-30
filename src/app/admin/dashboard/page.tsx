@@ -223,8 +223,8 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Settings & Billing</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ActionCard
-              title="Account Settings"
-              description="Manage your account preferences"
+              title="Display Settings"
+              description="Show/hide sections and customize your profile"
               icon={<Settings size={24} />}
               href="/admin/settings"
               color="primary"
