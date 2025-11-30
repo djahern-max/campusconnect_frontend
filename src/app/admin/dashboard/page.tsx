@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/useAuth';
-import { useInstitutionDataQuality } from '@/hooks/useInstitutionData'; // ✅ Add this import
+import { useInstitutionDataQuality } from '@/hooks/useInstitutionData';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
@@ -17,7 +17,11 @@ import {
   FileText,
   Settings,
   CreditCard,
-  TrendingUp
+  TrendingUp,
+  DollarSign,
+  GraduationCap,
+  BookOpen,
+  User
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -26,7 +30,7 @@ export default function AdminDashboard() {
   const user = useAuthStore((state) => state.user);
   const { data: currentUser } = useCurrentUser();
 
-  // ✅ Get institution data
+  // Get institution data
   const institutionId = user?.entity_type === 'institution' ? user.entity_id : null;
   const { quality, loading: loadingQuality } = useInstitutionDataQuality(institutionId);
 
@@ -57,18 +61,16 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
             <p className="text-gray-600">
-              {/* ✅ Show institution name if available, otherwise show email */}
               {loadingQuality ? (
                 'Loading...'
               ) : quality?.institution_name ? (
-                <><span className="font-semibold">{quality.institution_name}</span></>
+                <span className="font-semibold">{quality.institution_name}</span>
               ) : (
                 `Welcome back, ${user?.email}`
               )}
             </p>
           </div>
 
-          {/* Rest of your dashboard... */}
           {/* Quick Stats */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <StatCard
@@ -89,37 +91,65 @@ export default function AdminDashboard() {
             <SubscriptionCard onUpgradeClick={handleUpgradeClick} />
           </div>
 
-          {/* Quick Actions */}
+          {/* Institution Data Section - NEW! */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Institution Data</h2>
             <div className="grid md:grid-cols-4 gap-6">
               <ActionCard
-                title="Data Quality"
-                description="View your completeness score and improve data"
-                icon={<TrendingUp className="h-6 w-6" />}
-                href="/admin/data-quality"
+                title="Profile"
+                description="Update institution name, location, and website"
+                icon={<User className="h-6 w-6" />}
+                href="/admin/profile"
                 color="primary"
               />
               <ActionCard
-                title="Edit Data"
-                description="Update tuition, admissions, and basic info"
-                icon={<FileText className="h-6 w-6" />}
-                href="/admin/edit-data"
+                title="Academic Info"
+                description="Student-faculty ratio, size, and locale"
+                icon={<BookOpen className="h-6 w-6" />}
+                href="/admin/academic"
                 color="success"
               />
               <ActionCard
-                title="Manage Gallery"
+                title="Costs & Tuition"
+                description="Update tuition, fees, and housing costs"
+                icon={<DollarSign className="h-6 w-6" />}
+                href="/admin/costs"
+                color="accent"
+              />
+              <ActionCard
+                title="Admissions"
+                description="Acceptance rate, SAT/ACT scores"
+                icon={<GraduationCap className="h-6 w-6" />}
+                href="/admin/admissions"
+                color="primary"
+              />
+            </div>
+          </div>
+
+          {/* Content Management Section */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Content Management</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <ActionCard
+                title="Gallery"
                 description="Upload and organize campus photos"
                 icon={<ImageIcon className="h-6 w-6" />}
                 href="/admin/gallery"
                 color="primary"
               />
               <ActionCard
-                title="Manage Videos"
+                title="Videos"
                 description="Add campus tours and testimonials"
                 icon={<Video className="h-6 w-6" />}
                 href="/admin/videos"
                 color="accent"
+              />
+              <ActionCard
+                title="Data Quality"
+                description="View completeness score and improve data"
+                icon={<TrendingUp className="h-6 w-6" />}
+                href="/admin/data-quality"
+                color="success"
               />
             </div>
           </div>
@@ -170,7 +200,6 @@ export default function AdminDashboard() {
   );
 }
 
-// Rest of your components...
 function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
   return (
     <Card>
@@ -205,8 +234,8 @@ function ActionCard({
   };
 
   return (
-    <Link href={href}>
-      <Card hover className="h-full">
+    <Link href={href} className="block h-full">
+      <Card hover className="h-full cursor-pointer">
         <CardBody>
           <div className={`inline-flex p-3 rounded-lg ${colorClasses[color]} mb-4`}>
             {icon}

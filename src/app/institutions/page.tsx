@@ -1,3 +1,4 @@
+//src/app/institutions/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,6 +36,14 @@ interface Institution {
   acceptance_rate?: number;
 }
 
+interface InstitutionListResponse {
+  institutions: Institution[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
 export default function InstitutionsPage() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +53,7 @@ export default function InstitutionsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Fetch institutions
   useEffect(() => {
@@ -54,54 +64,75 @@ export default function InstitutionsPage() {
 
       try {
         let allInstitutions: Institution[] = [];
-        let offset = 0;
-        const limit = 500;
+        let page = 1;
+        const limit = 100; // Backend max is 100
         let hasMoreData = true;
+        let grandTotal = 0;
 
-        // Fetch all institutions (still needed for accurate total count and filtering)
+        // Fetch all institutions with pagination
         while (hasMoreData) {
+          // Build query parameters correctly
           const params = new URLSearchParams({
+            page: page.toString(),
             limit: limit.toString(),
-            offset: offset.toString(),
-            min_completeness: '0',
           });
 
-          if (selectedState) {
-            params.append('state', selectedState);
+          // Add optional filters
+          if (selectedState && selectedState.length === 2) {
+            params.append('state', selectedState.toUpperCase());
           }
 
-          if (searchTerm) {
-            params.append('query_text', searchTerm);
+          if (searchTerm && searchTerm.trim().length > 0) {
+            params.append('search_query', searchTerm.trim());
           }
 
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || 'https://abacadaba.com'}/api/v1/institutions/search/filtered?${params}`,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          // Use the correct endpoint: /api/v1/institutions/
+          const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/institutions/?${params}`;
+          console.log('Fetching:', url); // Debug log
+
+          const response = await fetch(url, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
 
           if (!response.ok) {
-            throw new Error('Failed to fetch institutions');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('API Error:', errorData);
+            throw new Error(`Failed to fetch institutions: ${response.status}`);
           }
 
-          const data = await response.json();
-          allInstitutions = [...allInstitutions, ...data];
+          const data: InstitutionListResponse = await response.json();
 
-          if (data.length < limit) {
+          // Store total from first response
+          if (page === 1) {
+            grandTotal = data.total;
+          }
+
+          allInstitutions = [...allInstitutions, ...data.institutions];
+
+          // Check if there's more data
+          if (!data.has_more || data.institutions.length < limit) {
             hasMoreData = false;
           } else {
-            offset += limit;
+            page += 1;
+          }
+
+          // Safety check to prevent infinite loops
+          if (page > 100) {
+            console.warn('Reached maximum page limit');
+            hasMoreData = false;
           }
         }
 
         setInstitutions(allInstitutions);
+        setTotalCount(grandTotal);
         setHasMore(allInstitutions.length > ITEMS_PER_PAGE);
       } catch (err) {
         console.error('Error fetching institutions:', err);
         setError('Failed to load institutions. Please try again.');
+        setInstitutions([]);
+        setTotalCount(0);
       } finally {
         setIsLoading(false);
       }
@@ -121,7 +152,6 @@ export default function InstitutionsPage() {
   };
 
   const displayedInstitutions = institutions.slice(0, displayedCount);
-  const totalCount = institutions.length;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -201,7 +231,13 @@ export default function InstitutionsPage() {
 
         {error && (
           <div className="text-center py-12">
-            <p className="text-red-600">{error}</p>
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button
+              variant="ghost"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
           </div>
         )}
 
@@ -258,21 +294,23 @@ export default function InstitutionsPage() {
                                   ? 'bg-purple-100 text-purple-800'
                                   : 'bg-gray-100 text-gray-800'
                               }`}>
-                              {institution.control_type ? institution.control_type.replace(/_/g, ' ') : 'N/A'}
+                              {institution.control_type.replace(/_/g, ' ')}
                             </span>
                           )}
 
                           {/* Show completeness score as a badge */}
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
-                              ? 'bg-green-100 text-green-800'
-                              : institution.data_completeness_score >= 60
-                                ? 'bg-blue-100 text-blue-800'
-                                : institution.data_completeness_score >= 40
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-gray-100 text-gray-800'
-                            }`}>
-                            {institution.data_completeness_score}% Complete
-                          </span>
+                          {institution.data_completeness_score !== undefined && (
+                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
+                                ? 'bg-green-100 text-green-800'
+                                : institution.data_completeness_score >= 60
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : institution.data_completeness_score >= 40
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-gray-100 text-gray-800'
+                              }`}>
+                              {institution.data_completeness_score}% Complete
+                            </span>
+                          )}
                         </div>
                       </div>
                     </CardBody>
@@ -325,7 +363,7 @@ export default function InstitutionsPage() {
 
         {!isLoading && !error && institutions.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600">No institutions found matching your criteria.</p>
+            <p className="text-gray-600 mb-4">No institutions found matching your criteria.</p>
             <Button
               variant="ghost"
               onClick={() => {

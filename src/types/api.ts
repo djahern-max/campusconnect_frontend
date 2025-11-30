@@ -1,20 +1,67 @@
-// CampusConnect API TypeScript Interfaces
-// Based on your backend API
+// src/types/api.ts - UPDATED Institution interface
+// This extends your existing Institution type with all fields from the database schema
 
 export interface Institution {
+  // Core Identity Fields
   id: number;
   ipeds_id: number;
   name: string;
   city: string;
-  state: string;
+  state: string; // 2-letter code
   control_type: 'PUBLIC' | 'PRIVATE_NONPROFIT' | 'PRIVATE_FOR_PROFIT';
+
+  // Display & Media
   primary_image_url: string | null;
+  website: string | null;
+
+  // Academic Characteristics
   student_faculty_ratio: number | null;
   size_category: string | null;
   locale: string | null;
+  level: number | null;
+  control: number | null;
+
+  // Cost Information (in institutions table)
+  tuition_in_state: number | null;
+  tuition_out_of_state: number | null;
+  tuition_private: number | null;
+  tuition_in_district: number | null;
+  room_cost: number | null;
+  board_cost: number | null;
+  room_and_board: number | null;
+  application_fee_undergrad: number | null;
+  application_fee_grad: number | null;
+
+  // Admissions Statistics (in institutions table)
+  acceptance_rate: number | null;
+  sat_reading_25th: number | null;
+  sat_reading_75th: number | null;
+  sat_math_25th: number | null;
+  sat_math_75th: number | null;
+  act_composite_25th: number | null;
+  act_composite_75th: number | null;
+
+  // Data Management & Verification
+  data_completeness_score: number;
+  completeness_score: number;
+  data_source: string;
+  ipeds_year: string;
+  is_featured: boolean;
+  admin_verified: boolean;
+  cost_data_verified: boolean;
+  cost_data_verified_at: string | null;
+  admissions_data_verified: boolean;
+  admissions_data_verified_at: string | null;
+  last_admin_update: string | null;
+  data_quality_notes: string | null;
+  data_last_updated: string;
+
+  // System Fields
   created_at: string;
   updated_at: string;
 }
+
+// Keep your existing interfaces below...
 
 export interface Scholarship {
   id: number;
@@ -26,12 +73,20 @@ export interface Scholarship {
   amount_min: number;
   amount_max: number;
   is_renewable: boolean;
+  number_of_awards: number | null;
   deadline: string | null;
+  application_opens: string | null;
+  for_academic_year: string | null;
   description: string | null;
   website_url: string | null;
   min_gpa: number | null;
   primary_image_url: string | null;
+  verified: boolean;
+  featured: boolean;
+  views_count: number;
+  applications_count: number;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface AdminUser {
@@ -62,6 +117,23 @@ export interface DisplaySettings {
   primary_color: string | null;
 }
 
+export interface EntityImage {
+  id: number;
+  entity_type: 'institution' | 'scholarship';
+  entity_id: number;
+  image_url: string;
+  cdn_url: string;
+  filename: string;
+  caption: string | null;
+  display_order: number;
+  is_featured: boolean;
+  image_type: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+// Keep InstitutionImage as an alias for backwards compatibility
+export type InstitutionImage = EntityImage;
 
 export interface InstitutionVideo {
   id: number;
@@ -122,6 +194,7 @@ export interface CheckoutSession {
   session_url: string;
 }
 
+// Historical data tables (separate from institutions table)
 export interface AdmissionData {
   id: number;
   institution_id: number;
@@ -190,72 +263,6 @@ export interface TuitionDataUpdate {
   data_source?: string;
   is_admin_verified?: boolean;
 }
-export interface AdmissionDataUpdate {
-  applications_total?: number;
-  admissions_total?: number;
-  enrolled_total?: number;
-  acceptance_rate?: number;
-  yield_rate?: number;
-  sat_reading_25th?: number;
-  sat_reading_50th?: number;
-  sat_reading_75th?: number;
-  sat_math_25th?: number;
-  sat_math_50th?: number;
-  sat_math_75th?: number;
-  percent_submitting_sat?: number;
-  is_admin_verified?: boolean;
-}
-
-export interface TuitionDataUpdate {
-  tuition_in_state?: number;
-  tuition_out_state?: number;
-  required_fees_in_state?: number;
-  required_fees_out_state?: number;
-  room_board_on_campus?: number;
-  data_source?: string;
-  is_admin_verified?: boolean;
-}
-
-export interface Scholarship {
-  id: number;
-  title: string;
-  organization: string;
-  scholarship_type: string;
-  status: string;
-  difficulty_level: string;
-  amount_min: number;
-  amount_max: number;
-  is_renewable: boolean;
-  number_of_awards: number | null;
-  deadline: string | null;
-  application_opens: string | null;
-  for_academic_year: string | null;
-  description: string | null;
-  website_url: string | null;
-  min_gpa: number | null;
-  primary_image_url: string | null;
-  verified: boolean;
-  featured: boolean;
-  views_count: number;
-  applications_count: number;
-  created_at: string;
-  updated_at: string | null;
-}
-
-export interface EntityImage {
-  id: number;
-  entity_type: 'institution' | 'scholarship';
-  entity_id: number;
-  image_url: string;
-  cdn_url: string;
-  filename: string;
-  caption: string | null;
-  display_order: number;
-  is_featured: boolean;
-  image_type: string | null;
-  created_at: string;
-  updated_at: string | null;
-}
 
 export interface ImageReorderRequest {
   image_ids: number[];
@@ -264,6 +271,3 @@ export interface ImageReorderRequest {
 export interface SetFeaturedImageRequest {
   image_id: number;
 }
-
-// Keep InstitutionImage as an alias for backwards compatibility
-export type InstitutionImage = EntityImage;
