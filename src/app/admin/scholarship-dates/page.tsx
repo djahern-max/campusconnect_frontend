@@ -1,12 +1,18 @@
+//src/app/admin/scholarship-dates/page.tsx
 'use client';
 
 /**
- * Scholarship Dates Page
+ * Scholarship Dates Page - FIXED VERSION
  * 
  * Allows scholarship admins to edit:
- * - Application deadline
- * - Notification date
- * - Application URL
+ * - Application deadline (maps to database 'deadline')
+ * - Application opens date (application_opens)
+ * - Academic year (for_academic_year)
+ * 
+ * KEY FIXES:
+ * 1. Uses /api/v1/scholarships/{id} endpoint instead of /api/v1/admin/profile/entity
+ * 2. Maps database fields correctly (deadline, not application_deadline)
+ * 3. Gets scholarship ID from user.entity_id
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,11 +21,14 @@ import { useAuthStore } from '@/stores/authStore';
 import type { Scholarship } from '@/types/api';
 import { DataSection } from '@/components/admin/forms/DataSection';
 import { DateInput } from '@/components/admin/forms/DateInput';
+import { TextInput } from '@/components/admin/forms/TextInput';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 export default function ScholarshipDatesPage() {
   const router = useRouter();
-  const { isAuthenticated, adminUser } = useAuthStore();
-  
+  const { isAuthenticated, user } = useAuthStore();
+
   const [scholarship, setScholarship] = useState<Scholarship | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -28,8 +37,8 @@ export default function ScholarshipDatesPage() {
 
   // Form state
   const [applicationDeadline, setApplicationDeadline] = useState<string | null>(null);
-  const [notificationDate, setNotificationDate] = useState<string | null>(null);
-  const [applicationUrl, setApplicationUrl] = useState('');
+  const [applicationOpens, setApplicationOpens] = useState<string | null>(null);
+  const [academicYear, setAcademicYear] = useState('');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -40,14 +49,14 @@ export default function ScholarshipDatesPage() {
 
   // Redirect if not a scholarship admin
   useEffect(() => {
-    if (adminUser && adminUser.entity_type !== 'scholarship') {
+    if (user && user.entity_type !== 'scholarship') {
       router.push('/admin/dashboard');
     }
-  }, [adminUser, router]);
+  }, [user, router]);
 
   // Load scholarship data
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) return;
 
     const loadScholarshipData = async () => {
       try {
@@ -57,7 +66,14 @@ export default function ScholarshipDatesPage() {
           return;
         }
 
-        const response = await fetch('http://localhost:8001/api/v1/admin/profile/entity', {
+        const scholarshipId = user.entity_id;
+        if (!scholarshipId) {
+          setErrorMessage('No scholarship associated with this account');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/scholarships/${scholarshipId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -73,13 +89,15 @@ export default function ScholarshipDatesPage() {
           throw new Error('Failed to load scholarship data');
         }
 
-        const data = await response.json();
-        const scholarshipData = data.scholarship;
-        
+        const scholarshipData = await response.json();
+
+        // Map database fields to component state
+        // Database uses 'deadline' not 'application_deadline'
         setScholarship(scholarshipData);
-        setApplicationDeadline(scholarshipData.application_deadline);
-        setNotificationDate(scholarshipData.notification_date);
-        setApplicationUrl(scholarshipData.application_url || '');
+        setApplicationDeadline(scholarshipData.deadline || null);
+        setApplicationOpens(scholarshipData.application_opens || null);
+        setAcademicYear(scholarshipData.for_academic_year || '');
+
       } catch (error) {
         console.error('Error loading scholarship data:', error);
         setErrorMessage('Failed to load scholarship data');
@@ -89,52 +107,43 @@ export default function ScholarshipDatesPage() {
     };
 
     loadScholarshipData();
-  }, [isAuthenticated, router]);
-
-  const validateDates = (): string | null => {
-    if (applicationDeadline && notificationDate) {
-      const deadline = new Date(applicationDeadline);
-      const notification = new Date(notificationDate);
-      
-      if (notification <= deadline) {
-        return 'Notification date must be after the application deadline';
-      }
-    }
-    return null;
-  };
+  }, [isAuthenticated, user, router]);
 
   const handleSave = async () => {
-    if (!scholarship) return;
-
-    const validationError = validateDates();
-    if (validationError) {
-      setErrorMessage(validationError);
-      return;
-    }
-
     setSaving(true);
-    setErrorMessage('');
     setSuccessMessage('');
+    setErrorMessage('');
 
     try {
       const token = localStorage.getItem('access_token');
-      if (!token) {
-        router.push('/admin/login');
-        return;
+      if (!token || !scholarship) {
+        throw new Error('Not authenticated or no scholarship data');
       }
 
-      const response = await fetch(`http://localhost:8001/api/v1/admin/scholarships/${scholarship.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          application_deadline: applicationDeadline,
-          notification_date: notificationDate,
-          application_url: applicationUrl || null,
-        }),
-      });
+      // Validate dates
+      if (applicationOpens && applicationDeadline) {
+        const opensDate = new Date(applicationOpens);
+        const deadlineDate = new Date(applicationDeadline);
+        if (opensDate > deadlineDate) {
+          throw new Error('Application opening date cannot be after the deadline');
+        }
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/admin/scholarships/${scholarship.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            deadline: applicationDeadline,  // Database uses 'deadline'
+            application_opens: applicationOpens,
+            for_academic_year: academicYear || null,
+          }),
+        }
+      );
 
       if (response.status === 401) {
         localStorage.removeItem('access_token');
@@ -143,35 +152,23 @@ export default function ScholarshipDatesPage() {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to save changes');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update scholarship');
       }
 
-      setSuccessMessage('Dates and application information updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setSuccessMessage('Scholarship dates updated successfully!');
+
+      const updatedData = await response.json();
+      setScholarship(updatedData);
+      setApplicationDeadline(updatedData.deadline || null);
+      setApplicationOpens(updatedData.application_opens || null);
+      setAcademicYear(updatedData.for_academic_year || '');
+
     } catch (error) {
-      console.error('Error saving changes:', error);
-      setErrorMessage('Failed to save changes. Please try again.');
+      console.error('Error saving scholarship:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to save changes');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const getDaysUntilDeadline = (): string | null => {
-    if (!applicationDeadline) return null;
-    
-    const deadline = new Date(applicationDeadline);
-    const today = new Date();
-    const diffTime = deadline.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) {
-      return `Deadline passed ${Math.abs(diffDays)} days ago`;
-    } else if (diffDays === 0) {
-      return 'Deadline is today!';
-    } else if (diffDays === 1) {
-      return '1 day until deadline';
-    } else {
-      return `${diffDays} days until deadline`;
     }
   };
 
@@ -186,30 +183,45 @@ export default function ScholarshipDatesPage() {
     );
   }
 
+  if (errorMessage && !scholarship) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{errorMessage}</p>
+          <button
+            onClick={() => router.push('/admin/dashboard')}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <button
             onClick={() => router.push('/admin/dashboard')}
             className="text-purple-600 hover:text-purple-700 mb-4 flex items-center"
           >
             ← Back to Dashboard
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Important Dates</h1>
-          <p className="text-gray-600 mt-2">
-            Manage application deadlines and notification timeline
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Important Dates</h1>
+          <p className="text-gray-600">
+            Manage application timeline and deadlines
           </p>
         </div>
 
-        {/* Messages */}
+        {/* Success/Error Messages */}
         {successMessage && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-green-800">{successMessage}</p>
           </div>
         )}
-
         {errorMessage && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-800">{errorMessage}</p>
@@ -217,46 +229,45 @@ export default function ScholarshipDatesPage() {
         )}
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          {/* Dates Section */}
+        <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
+          {/* Application Timeline */}
           <DataSection title="Application Timeline">
             <div className="space-y-4">
               <DateInput
-                label="Application Deadline"
-                value={applicationDeadline}
-                onChange={setApplicationDeadline}
-                helpText="Last day students can submit applications"
+                label="Application Opens"
+                value={applicationOpens}
+                onChange={(date) => setApplicationOpens(date)}
+                helpText="When does the application period begin?"
               />
-
-              {applicationDeadline && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    📅 {getDaysUntilDeadline()}
-                  </p>
-                </div>
-              )}
 
               <DateInput
-                label="Notification Date"
-                value={notificationDate}
-                onChange={setNotificationDate}
-                helpText="When recipients will be notified of their award"
-                minDate={applicationDeadline || undefined}
+                label="Application Deadline"
+                value={applicationDeadline}
+                onChange={(date) => setApplicationDeadline(date)}
+                required
+                helpText="Final date for students to submit applications"
               />
 
-              {applicationDeadline && notificationDate && (
-                <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                  <p className="text-sm text-purple-800">
-                    <strong>Timeline:</strong> Applications close on{' '}
-                    {new Date(applicationDeadline).toLocaleDateString('en-US', {
+              <TextInput
+                label="Academic Year"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+                helpText="Which academic year is this scholarship for? (e.g., 2025-2026)"
+                placeholder="2025-2026"
+              />
+
+              {applicationOpens && applicationDeadline && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="text-sm font-medium text-blue-900 mb-2">Timeline Preview:</h4>
+                  <p className="text-sm text-blue-800">
+                    Application window: {new Date(applicationOpens).toLocaleDateString('en-US', {
+                      year: 'numeric',
                       month: 'long',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}, with winners announced on{' '}
-                    {new Date(notificationDate).toLocaleDateString('en-US', {
+                      day: 'numeric'
+                    })} to {new Date(applicationDeadline).toLocaleDateString('en-US', {
+                      year: 'numeric',
                       month: 'long',
-                      day: 'numeric',
-                      year: 'numeric'
+                      day: 'numeric'
                     })}
                   </p>
                 </div>
@@ -264,38 +275,17 @@ export default function ScholarshipDatesPage() {
             </div>
           </DataSection>
 
-          {/* Application URL Section */}
-          <DataSection title="Application Information">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Application URL
-              </label>
-              <input
-                type="url"
-                value={applicationUrl}
-                onChange={(e) => setApplicationUrl(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="https://example.com/apply"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Direct link where students can apply for this scholarship
+          {/* Deadline Warning */}
+          {applicationDeadline && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h4 className="text-sm font-medium text-yellow-900 mb-2">⚠️ Important:</h4>
+              <p className="text-sm text-yellow-800">
+                Make sure your deadline is accurate. Students rely on this date to plan their applications.
+                Consider setting the deadline at least a few days before you actually need to review applications
+                to allow processing time.
               </p>
             </div>
-
-            {applicationUrl && (
-              <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <p className="text-xs text-gray-600 mb-2">Preview link:</p>
-                <a
-                  href={applicationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-purple-600 hover:text-purple-700 underline break-all"
-                >
-                  {applicationUrl}
-                </a>
-              </div>
-            )}
-          </DataSection>
+          )}
 
           {/* Save Button */}
           <div className="flex justify-end pt-4">

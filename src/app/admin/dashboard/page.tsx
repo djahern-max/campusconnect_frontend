@@ -1,3 +1,4 @@
+//src/app/admin/dashboard/page.tsx
 'use client';
 
 /**
@@ -65,7 +66,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, description, icon, href,
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { isAuthenticated, adminUser } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,7 +77,14 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, router]);
 
-  if (loading) {
+  // ADD: Wait for user data to be loaded from storage
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user]);
+
+  if (loading || !user) {  // ✅ Also check for user
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -87,8 +95,10 @@ export default function AdminDashboard() {
     );
   }
 
-  const isInstitutionAdmin = adminUser?.entity_type === 'institution';
-  const isScholarshipAdmin = adminUser?.entity_type === 'scholarship';
+  const isInstitutionAdmin = user?.entity_type === 'institution';
+  const isScholarshipAdmin = user?.entity_type === 'scholarship';
+
+  console.log('Rendering dashboard for:', { isInstitutionAdmin, isScholarshipAdmin });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,7 +182,6 @@ export default function AdminDashboard() {
         {/* Scholarship Admin Cards */}
         {isScholarshipAdmin && (
           <>
-            {/* Scholarship Data Section */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Scholarship Data</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -235,7 +244,7 @@ export default function AdminDashboard() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Info</h3>
           <div className="space-y-2 text-sm text-gray-600">
             <p><strong>Account Type:</strong> {isInstitutionAdmin ? 'Institution Admin' : 'Scholarship Admin'}</p>
-            <p><strong>Email:</strong> {adminUser?.email}</p>
+            <p><strong>Email:</strong> {user?.email}</p>
             <p><strong>Status:</strong> <span className="text-green-600">Active</span></p>
           </div>
         </div>

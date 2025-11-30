@@ -1,5 +1,4 @@
-// src/types/api.ts - UPDATED Institution interface
-// This extends your existing Institution type with all fields from the database schema
+// src/types/api.ts - UPDATED with Scholarship support
 
 export interface Institution {
   // Core Identity Fields
@@ -61,11 +60,10 @@ export interface Institution {
   updated_at: string;
 }
 
-// Keep your existing interfaces below...
-
+// NEW: Complete Scholarship interface matching your backend
 export interface Scholarship {
   id: number;
-  title: string;
+  title: string;  // was 'name'
   organization: string;
   scholarship_type: string;
   status: string;
@@ -73,31 +71,57 @@ export interface Scholarship {
   amount_min: number;
   amount_max: number;
   is_renewable: boolean;
-  number_of_awards: number | null;
-  deadline: string | null;
-  application_opens: string | null;
-  for_academic_year: string | null;
-  description: string | null;
-  website_url: string | null;
-  min_gpa: number | null;
-  primary_image_url: string | null;
+  number_of_awards?: number;
+  deadline?: string;  // was 'application_deadline'
+  application_opens?: string;
+  for_academic_year?: string;
+  description?: string;
+  website_url?: string;  // was 'more_info_url'
+  min_gpa?: number;  // was 'gpa_requirement'
+  primary_image_url?: string;
   verified: boolean;
   featured: boolean;
   views_count: number;
   applications_count: number;
   created_at: string;
-  updated_at: string | null;
+  updated_at?: string;
 }
 
+// NEW: For scholarship update requests
+export interface ScholarshipUpdateRequest {
+  name?: string;
+  organization?: string | null;
+  description?: string | null;
+  amount_min?: number | null;
+  amount_max?: number | null;
+  is_renewable?: boolean;
+  gpa_requirement?: number | null;
+  citizenship_requirements?: string | null;
+  field_of_study?: string | null;
+  application_deadline?: string | null;
+  notification_date?: string | null;
+  application_url?: string | null;
+  more_info_url?: string | null;
+}
+
+// UPDATED: AdminUser with all fields
 export interface AdminUser {
   id: number;
   email: string;
   entity_type: 'institution' | 'scholarship';
   entity_id: number;
-  role: string;
+  role?: string;
   is_active: boolean;
   created_at: string;
+  updated_at?: string;
   last_login?: string;
+}
+
+// NEW: Profile entity response (what /api/v1/admin/profile/entity returns)
+export interface ProfileEntityResponse {
+  admin_user: AdminUser;
+  institution?: Institution;
+  scholarship?: Scholarship;
 }
 
 export interface DisplaySettings {
@@ -176,9 +200,12 @@ export interface CustomSection {
   order: number;
 }
 
+// UPDATED: LoginResponse now includes admin_user
 export interface LoginResponse {
   access_token: string;
   token_type: string;
+  expires_in?: number;
+  admin_user: AdminUser;
 }
 
 export interface Subscription {
@@ -270,4 +297,13 @@ export interface ImageReorderRequest {
 
 export interface SetFeaturedImageRequest {
   image_id: number;
+}
+
+// NEW: Scholarship-specific statistics (for dashboard)
+export interface ScholarshipStatistics {
+  total_scholarships: number;
+  active_scholarships: number;
+  pending_scholarships: number;
+  expired_scholarships: number;
+  total_amount_awarded: number;
 }
