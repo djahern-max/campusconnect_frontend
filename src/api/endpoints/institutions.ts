@@ -10,17 +10,17 @@ interface InstitutionListResponse {
 }
 
 export const institutionsApi = {
-  getAll: async (params?: { state?: string; page?: number; limit?: number }) => {
+  getAll: async (params?: { state?: string; page?: number; limit?: number }): Promise<InstitutionListResponse> => {
     const response = await apiClient.get<InstitutionListResponse>('/institutions', { params });
-    return response.data; // Returns { institutions: [...], total, page, limit, has_more }
+    return response.data;
   },
 
-  getById: async (ipeds_id: number) => {
+  getById: async (ipeds_id: number): Promise<Institution> => {
     const response = await apiClient.get<Institution>(`/institutions/${ipeds_id}`);
     return response.data;
   },
 
-  getAdmissions: async (ipeds_id: number, academic_year?: string) => {
+  getAdmissions: async (ipeds_id: number, academic_year?: string): Promise<AdmissionData[]> => {
     const params = academic_year ? { academic_year } : {};
     const response = await apiClient.get<AdmissionData[]>(
       `/institutions/${ipeds_id}/admissions`,
@@ -29,7 +29,7 @@ export const institutionsApi = {
     return response.data;
   },
 
-  getTuition: async (ipeds_id: number, academic_year?: string) => {
+  getTuition: async (ipeds_id: number, academic_year?: string): Promise<TuitionData[]> => {
     const params = academic_year ? { academic_year } : {};
     const response = await apiClient.get<TuitionData[]>(
       `/institutions/${ipeds_id}/tuition`,
@@ -38,7 +38,7 @@ export const institutionsApi = {
     return response.data;
   },
 
-  getFinancialOverview: async (ipeds_id: number) => {
+  getFinancialOverview: async (ipeds_id: number): Promise<FinancialOverview> => {
     const response = await apiClient.get<FinancialOverview>(
       `/institutions/${ipeds_id}/financial-overview`
     );
