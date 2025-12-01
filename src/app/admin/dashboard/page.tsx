@@ -7,6 +7,8 @@
  * Conditionally shows either:
  * - Institution management cards (for entity_type === 'institution')
  * - Scholarship management cards (for entity_type === 'scholarship')
+ * 
+ * BOTH now have Gallery and Videos in Content Management!
  */
 
 import React, { useEffect, useState } from 'react';
@@ -182,6 +184,7 @@ export default function AdminDashboard() {
         {/* Scholarship Admin Cards */}
         {isScholarshipAdmin && (
           <>
+            {/* Scholarship Data Section */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Scholarship Data</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -212,6 +215,27 @@ export default function AdminDashboard() {
                   icon={<Calendar size={24} />}
                   href="/admin/scholarship-dates"
                   color="warning"
+                />
+              </div>
+            </div>
+
+            {/* Content Management Section - NOW FOR SCHOLARSHIPS TOO! */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Content Management</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ActionCard
+                  title="Gallery"
+                  description="Upload and manage scholarship images"
+                  icon={<Image size={24} />}
+                  href="/admin/gallery"
+                  color="accent"
+                />
+                <ActionCard
+                  title="Videos"
+                  description="Add testimonials and info videos"
+                  icon={<Video size={24} />}
+                  href="/admin/videos"
+                  color="success"
                 />
               </div>
             </div>

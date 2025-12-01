@@ -132,7 +132,7 @@ export default function HomePage() {
                   The College & Scholarship Directory
                 </p>
                 <p className="text-xl text-gray-400 mb-4 drop-shadow-lg">
-                  Explore 609 institutions and 126 scholarships
+                  Explore 6,059 institutions and 126 scholarships
                 </p>
                 <p className="text-lg text-gray-500 mb-8 drop-shadow-lg">
                   Comprehensive information, virtual tours, and funding opportunities
@@ -295,8 +295,8 @@ export default function HomePage() {
                     setIsAutoPlaying(false);
                   }}
                   className={`h-2 rounded-full transition-all ${index === currentSlide
-                      ? 'bg-white w-8'
-                      : 'bg-white/50 hover:bg-white/75 w-2'
+                    ? 'bg-white w-8'
+                    : 'bg-white/50 hover:bg-white/75 w-2'
                     }`}
                   aria-label={`Go to slide ${index + 1}`}
                   aria-current={index === currentSlide ? 'true' : undefined}

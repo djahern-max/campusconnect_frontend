@@ -82,9 +82,9 @@ export function Navbar() {
           {/* Logo / Brand */}
           <Link href="/" className="flex items-center group space-x-2">
             {/* Subtle sparkle */}
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
               <Sparkles
-                className="h-4 w-4 text-purple-500 transition-all group-hover:rotate-12 group-hover:text-blue-500 group-hover:scale-110"
+                className="h-4 w-4 text-blue-500 transition-all group-hover:rotate-12 group-hover:text-cyan-500 group-hover:scale-110"
                 aria-hidden="true"
               />
             </span>

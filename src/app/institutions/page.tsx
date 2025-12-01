@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Users, Search, Loader2 } from 'lucide-react';
+import { institutionsApi } from '@/api/endpoints/institutions';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -17,7 +18,7 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
-const ITEMS_PER_PAGE = 24; // Show 24 institutions per page (8 rows of 3)
+const ITEMS_PER_PAGE = 24;
 
 interface Institution {
   id: number;
@@ -29,129 +30,114 @@ interface Institution {
   primary_image_url?: string;
   student_faculty_ratio?: number;
   size_category?: string;
-  data_completeness_score: number;
+  data_completeness_score?: number;
   is_featured?: boolean;
   tuition_in_state?: number;
   tuition_out_of_state?: number;
   acceptance_rate?: number;
 }
 
-interface InstitutionListResponse {
-  institutions: Institution[];
-  total: number;
-  page: number;
-  limit: number;
-  has_more: boolean;
-}
-
 export default function InstitutionsPage() {
+  // State
   const [selectedState, setSelectedState] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [allInstitutions, setAllInstitutions] = useState<Institution[]>([]);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
 
-  // Fetch institutions
+  // Fetch institutions when state filter changes
   useEffect(() => {
     const fetchInstitutions = async () => {
-      setIsLoading(true);
-      setError(null);
-      setDisplayedCount(ITEMS_PER_PAGE);
-
       try {
-        let allInstitutions: Institution[] = [];
-        let page = 1;
-        const limit = 100; // Backend max is 100
-        let hasMoreData = true;
-        let grandTotal = 0;
+        setIsLoading(true);
+        setError(null);
 
-        // Fetch all institutions with pagination
-        while (hasMoreData) {
-          // Build query parameters correctly
-          const params = new URLSearchParams({
-            page: page.toString(),
-            limit: limit.toString(),
-          });
+        // Build params object
+        const params: { limit: number; offset: number; state?: string } = {
+          limit: 100,
+          offset: 0
+        };
 
-          // Add optional filters
-          if (selectedState && selectedState.length === 2) {
-            params.append('state', selectedState.toUpperCase());
-          }
-
-          if (searchTerm && searchTerm.trim().length > 0) {
-            params.append('search_query', searchTerm.trim());
-          }
-
-          // Use the correct endpoint: /api/v1/institutions/
-          const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/institutions/?${params}`;
-          console.log('Fetching:', url); // Debug log
-
-          const response = await fetch(url, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('API Error:', errorData);
-            throw new Error(`Failed to fetch institutions: ${response.status}`);
-          }
-
-          const data: InstitutionListResponse = await response.json();
-
-          // Store total from first response
-          if (page === 1) {
-            grandTotal = data.total;
-          }
-
-          allInstitutions = [...allInstitutions, ...data.institutions];
-
-          // Check if there's more data
-          if (!data.has_more || data.institutions.length < limit) {
-            hasMoreData = false;
-          } else {
-            page += 1;
-          }
-
-          // Safety check to prevent infinite loops
-          if (page > 100) {
-            console.warn('Reached maximum page limit');
-            hasMoreData = false;
-          }
+        if (selectedState) {
+          params.state = selectedState;
         }
 
-        setInstitutions(allInstitutions);
-        setTotalCount(grandTotal);
-        setHasMore(allInstitutions.length > ITEMS_PER_PAGE);
+        console.log('Fetching with params:', params);
+
+        const data = await institutionsApi.getAll(params);
+
+        console.log('API Response received');
+        console.log('Type:', typeof data);
+        console.log('Is array?', Array.isArray(data));
+
+        if (Array.isArray(data)) {
+          console.log('Array length:', data.length);
+          console.log('First item:', data[0]);
+          setAllInstitutions(data);
+        } else {
+          console.error('API did not return an array. Received:', data);
+          setError('Unexpected response format from API');
+          setAllInstitutions([]);
+        }
+
+        setDisplayedCount(ITEMS_PER_PAGE);
       } catch (err) {
         console.error('Error fetching institutions:', err);
-        setError('Failed to load institutions. Please try again.');
-        setInstitutions([]);
-        setTotalCount(0);
+        if (err instanceof Error) {
+          console.error('Error message:', err.message);
+          console.error('Error stack:', err.stack);
+        }
+        setError(err instanceof Error ? err.message : 'Failed to fetch institutions');
+        setAllInstitutions([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchInstitutions();
-  }, [selectedState, searchTerm]);
+  }, [selectedState]);
+
+  // Reset display count when search changes
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [searchTerm]);
+
+  // Client-side filtering by search term
+  const getFilteredInstitutions = (): Institution[] => {
+    if (!Array.isArray(allInstitutions)) {
+      console.warn('allInstitutions is not an array:', allInstitutions);
+      return [];
+    }
+
+    if (!searchTerm.trim()) {
+      return allInstitutions;
+    }
+
+    const search = searchTerm.toLowerCase().trim();
+    return allInstitutions.filter(institution => {
+      const nameMatch = institution.name?.toLowerCase().includes(search) ?? false;
+      const cityMatch = institution.city?.toLowerCase().includes(search) ?? false;
+      return nameMatch || cityMatch;
+    });
+  };
+
+  const filteredInstitutions = getFilteredInstitutions();
+  const displayedInstitutions = filteredInstitutions.slice(0, displayedCount);
+  const hasMore = displayedCount < filteredInstitutions.length;
 
   const handleLoadMore = () => {
     setIsLoadingMore(true);
     setTimeout(() => {
-      const newCount = displayedCount + ITEMS_PER_PAGE;
+      const newCount = Math.min(
+        displayedCount + ITEMS_PER_PAGE,
+        filteredInstitutions.length
+      );
       setDisplayedCount(newCount);
-      setHasMore(newCount < institutions.length);
       setIsLoadingMore(false);
-    }, 300); // Small delay for better UX
+    }, 300);
   };
-
-  const displayedInstitutions = institutions.slice(0, displayedCount);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -162,7 +148,7 @@ export default function InstitutionsPage() {
             Explore Institutions
           </h1>
           <p className="text-lg text-gray-600">
-            Browse {totalCount.toLocaleString()} colleges and universities
+            Browse colleges and universities
           </p>
         </div>
 
@@ -221,7 +207,7 @@ export default function InstitutionsPage() {
           )}
         </div>
 
-        {/* Results */}
+        {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
             <Loader2 className="inline-block animate-spin h-12 w-12 text-primary-600 mb-4" />
@@ -229,9 +215,11 @@ export default function InstitutionsPage() {
           </div>
         )}
 
-        {error && (
+        {/* Error State */}
+        {error && !isLoading && (
           <div className="text-center py-12">
             <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-sm text-gray-600 mb-4">Check console for details</p>
             <Button
               variant="ghost"
               onClick={() => window.location.reload()}
@@ -241,140 +229,147 @@ export default function InstitutionsPage() {
           </div>
         )}
 
-        {!isLoading && !error && institutions.length > 0 && (
+        {/* Results */}
+        {!isLoading && !error && (
           <>
-            <div className="mb-4 text-gray-600">
-              Showing {displayedInstitutions.length.toLocaleString()} of {totalCount.toLocaleString()} institution{totalCount !== 1 ? 's' : ''}
-            </div>
+            {filteredInstitutions.length > 0 ? (
+              <>
+                <div className="mb-4 text-gray-600">
+                  Showing {displayedInstitutions.length.toLocaleString()} of {filteredInstitutions.length.toLocaleString()} institution{filteredInstitutions.length !== 1 ? 's' : ''}
+                  {searchTerm && ` matching "${searchTerm}"`}
+                </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedInstitutions.map((institution) => (
-                <Link
-                  key={institution.ipeds_id}
-                  href={`/institutions/${institution.ipeds_id}`}
-                >
-                  <Card hover className="h-full">
-                    {/* Image */}
-                    {institution.primary_image_url && (
-                      <div className="relative h-48 w-full">
-                        <Image
-                          src={institution.primary_image_url}
-                          alt={institution.name}
-                          fill
-                          className="object-cover rounded-t-lg"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          unoptimized
-                        />
-                      </div>
-                    )}
-
-                    <CardBody>
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
-                        {institution.name}
-                      </h3>
-
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                          {institution.city}, {institution.state}
-                        </div>
-
-                        {institution.student_faculty_ratio && (
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-2 text-gray-400" />
-                            {institution.student_faculty_ratio}:1 student-faculty ratio
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayedInstitutions.map((institution) => (
+                    <Link
+                      key={institution.ipeds_id}
+                      href={`/institutions/${institution.ipeds_id}`}
+                    >
+                      <Card hover className="h-full">
+                        {/* Image */}
+                        {institution.primary_image_url && (
+                          <div className="relative h-48 w-full">
+                            <Image
+                              src={institution.primary_image_url}
+                              alt={institution.name}
+                              fill
+                              className="object-cover rounded-t-lg"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              unoptimized
+                            />
                           </div>
                         )}
 
-                        <div className="mt-3 flex items-center justify-between">
-                          {institution.control_type && (
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
-                                ? 'bg-blue-100 text-blue-800'
-                                : institution.control_type === 'PRIVATE_NONPROFIT'
-                                  ? 'bg-purple-100 text-purple-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {institution.control_type.replace(/_/g, ' ')}
-                            </span>
-                          )}
+                        <CardBody>
+                          <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+                            {institution.name}
+                          </h3>
 
-                          {/* Show completeness score as a badge */}
-                          {institution.data_completeness_score !== undefined && (
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
-                                ? 'bg-green-100 text-green-800'
-                                : institution.data_completeness_score >= 60
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : institution.data_completeness_score >= 40
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {institution.data_completeness_score}% Complete
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                              {institution.city}, {institution.state}
+                            </div>
 
-            {/* Load More Button */}
-            {hasMore && !isLoading && (
-              <div className="mt-8 flex justify-center">
-                <Button
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                  size="lg"
-                  className="min-w-[200px]"
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      Load More
-                      <span className="ml-2 text-sm opacity-75">
-                        ({Math.min(ITEMS_PER_PAGE, totalCount - displayedCount)} more)
-                      </span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+                            {institution.student_faculty_ratio && (
+                              <div className="flex items-center">
+                                <Users className="h-4 w-4 mr-2 text-gray-400" />
+                                {institution.student_faculty_ratio}:1 student-faculty ratio
+                              </div>
+                            )}
 
-            {/* End message */}
-            {!hasMore && displayedCount > ITEMS_PER_PAGE && (
-              <div className="mt-8 text-center text-gray-600">
-                <p>You've reached the end of the results</p>
+                            <div className="mt-3 flex items-center justify-between flex-wrap gap-2">
+                              {institution.control_type && (
+                                <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : institution.control_type === 'PRIVATE_NONPROFIT'
+                                      ? 'bg-purple-100 text-purple-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                  {institution.control_type.replace(/_/g, ' ')}
+                                </span>
+                              )}
+
+                              {institution.data_completeness_score !== undefined && institution.data_completeness_score !== null && (
+                                <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
+                                    ? 'bg-green-100 text-green-800'
+                                    : institution.data_completeness_score >= 60
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : institution.data_completeness_score >= 40
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                  {institution.data_completeness_score}% Complete
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      onClick={handleLoadMore}
+                      disabled={isLoadingMore}
+                      size="lg"
+                      className="min-w-[200px]"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          Load More
+                          <span className="ml-2 text-sm opacity-75">
+                            ({Math.min(ITEMS_PER_PAGE, filteredInstitutions.length - displayedCount)} more)
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* End message */}
+                {!hasMore && displayedCount > ITEMS_PER_PAGE && (
+                  <div className="mt-8 text-center text-gray-600">
+                    <p>You've reached the end of the results</p>
+                    <Button
+                      variant="ghost"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="mt-2"
+                    >
+                      Back to Top ↑
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">
+                  {searchTerm
+                    ? `No institutions found matching "${searchTerm}".`
+                    : 'No institutions found matching your criteria.'}
+                </p>
                 <Button
                   variant="ghost"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="mt-2"
+                  onClick={() => {
+                    setSelectedState('');
+                    setSearchTerm('');
+                  }}
+                  className="mt-4"
                 >
-                  Back to Top ↑
+                  Clear filters
                 </Button>
               </div>
             )}
           </>
-        )}
-
-        {!isLoading && !error && institutions.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No institutions found matching your criteria.</p>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSelectedState('');
-                setSearchTerm('');
-              }}
-              className="mt-4"
-            >
-              Clear filters
-            </Button>
-          </div>
         )}
       </div>
     </div>

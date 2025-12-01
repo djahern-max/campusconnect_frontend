@@ -1,16 +1,25 @@
 import apiClient from '../client';
 import type { Institution, AdmissionData, TuitionData, FinancialOverview } from '@/types/api';
 
+interface InstitutionListResponse {
+  institutions: Institution[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
 export const institutionsApi = {
-  getAll: async (params?: { state?: string; limit?: number; offset?: number }) => {
-    const response = await apiClient.get<Institution[]>('/institutions', { params });
-    return response.data;
+  getAll: async (params?: { state?: string; page?: number; limit?: number }) => {
+    const response = await apiClient.get<InstitutionListResponse>('/institutions', { params });
+    return response.data; // Returns { institutions: [...], total, page, limit, has_more }
   },
 
   getById: async (ipeds_id: number) => {
     const response = await apiClient.get<Institution>(`/institutions/${ipeds_id}`);
     return response.data;
   },
+
   getAdmissions: async (ipeds_id: number, academic_year?: string) => {
     const params = academic_year ? { academic_year } : {};
     const response = await apiClient.get<AdmissionData[]>(
