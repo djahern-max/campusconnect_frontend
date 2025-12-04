@@ -49,7 +49,8 @@ export default function HomePage() {
         if (!isMounted) return;
 
         // Shuffle for variety on each page load
-        const shuffled = [...response.data].sort(() => Math.random() - 0.5);
+        const data = Array.isArray(response.data) ? response.data : [];
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
 
         setFeaturedSlides(shuffled);
       } catch (error) {
