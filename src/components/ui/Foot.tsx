@@ -17,22 +17,7 @@ export function Footer() {
 
                         {/* Brand */}
                         <div>
-                            <div className="flex items-center mb-4 space-x-3 group">
-                                {/* Books Icon from Favicon */}
-                                <div className="relative h-7 w-7 flex-shrink-0 transition-transform group-hover:scale-110">
-                                    <Image
-                                        src="/favicon-32x32.png"
-                                        alt="The College Directory"
-                                        width={28}
-                                        height={28}
-                                        className="object-contain brightness-90 group-hover:brightness-110 transition-all"
-                                    />
-                                </div>
 
-                                <h3 className="text-lg font-bold text-white">
-                                    The College Directory
-                                </h3>
-                            </div>
 
                             <p className="text-gray-400 text-sm mb-2">
                                 Discover Your Future

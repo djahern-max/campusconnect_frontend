@@ -126,13 +126,8 @@ export default function HomePage() {
           <div className="relative h-full flex flex-col justify-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
               <div className="text-white">
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-                  The College Directory
-                </h1>
 
-                <p className="text-xl text-gray-400 mb-4 drop-shadow-lg">
-                  Explore Colleges & Scholarships
-                </p>
+
 
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -323,10 +318,6 @@ function RestOfPageContent() {
           {/* Main slogan */}
 
 
-          {/* Short supporting line */}
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-10">
-            Compare colleges and scholarships with real information. Make confident decisions about your education.
-          </p>
 
           {/* CTA */}
           <div className="space-y-4">
