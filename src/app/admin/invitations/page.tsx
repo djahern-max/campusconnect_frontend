@@ -1,3 +1,4 @@
+//src/app/admin/invitations/page.tsx
 'use client';
 
 import { useState, useEffect, type FormEvent } from 'react';
@@ -243,11 +244,21 @@ export default function InvitationManagerPage() {
         `${API_URL}/api/v1/institutions?limit=100`
       );
       if (response.ok) {
-        const data: Institution[] = await response.json();
-        setInstitutions(data);
+        const data = await response.json();
+
+        // ✅ Handle paginated response
+        if (data.institutions && Array.isArray(data.institutions)) {
+          setInstitutions(data.institutions);  // Extract the array
+        } else if (Array.isArray(data)) {
+          setInstitutions(data);  // Fallback for non-paginated
+        } else {
+          console.error('Unexpected institutions response:', data);
+          setInstitutions([]);
+        }
       }
     } catch (err) {
       console.error('Error fetching institutions:', err);
+      setInstitutions([]);
     }
   };
 
@@ -257,11 +268,21 @@ export default function InvitationManagerPage() {
         `${API_URL}/api/v1/scholarships?limit=100`
       );
       if (response.ok) {
-        const data: Scholarship[] = await response.json();
-        setScholarships(data);
+        const data = await response.json();
+
+        // ✅ Handle paginated response (check if scholarships endpoint also uses pagination)
+        if (data.scholarships && Array.isArray(data.scholarships)) {
+          setScholarships(data.scholarships);
+        } else if (Array.isArray(data)) {
+          setScholarships(data);  // Scholarships might still return array directly
+        } else {
+          console.error('Unexpected scholarships response:', data);
+          setScholarships([]);
+        }
       }
     } catch (err) {
       console.error('Error fetching scholarships:', err);
+      setScholarships([]);
     }
   };
 
