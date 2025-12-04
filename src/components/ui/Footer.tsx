@@ -100,7 +100,7 @@ export function Footer() {
 
           {/* Bottom Bar */}
           <div className="border-t border-gray-800 mt-10 pt-6 text-center text-xs text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Abacadaba. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} The College Directory. All rights reserved.</p>
           </div>
         </div>
       </footer>

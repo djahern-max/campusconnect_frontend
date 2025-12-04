@@ -15,7 +15,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-900">About Abacadaba</h2>
+            <h2 className="text-3xl font-bold text-gray-900">About The College Directory</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition"
@@ -33,8 +33,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Our Mission</h3>
               <p className="leading-relaxed">
-                Abacadaba empowers colleges and scholarship organizations to showcase their offerings 
-                to prospective students through rich, interactive profiles. We believe that finding 
+                The College Directory empowers colleges and scholarship organizations to showcase their offerings
+                to prospective students through rich, interactive profiles. We believe that finding
                 the right institution should be based on real information, not guesswork.
               </p>
             </div>
@@ -42,8 +42,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">For Institutions</h3>
               <p className="leading-relaxed">
-                Enhance your visibility with unlimited campus photos, virtual tour videos, 
-                and detailed program descriptions. Connect with prospective students in a meaningful 
+                Enhance your visibility with unlimited campus photos, virtual tour videos,
+                and detailed program descriptions. Connect with prospective students in a meaningful
                 way and showcase what makes your institution unique.
               </p>
             </div>
@@ -51,8 +51,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">For Students</h3>
               <p className="leading-relaxed">
-                Explore hundreds of institutions and scholarships with comprehensive data, 
-                virtual tours, and real campus imagery. Make informed decisions about your 
+                Explore hundreds of institutions and scholarships with comprehensive data,
+                virtual tours, and real campus imagery. Make informed decisions about your
                 educational future.
               </p>
             </div>

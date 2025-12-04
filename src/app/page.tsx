@@ -127,11 +127,9 @@ export default function HomePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
               <div className="text-white">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-                  Abacadaba
+                  The College Directory
                 </h1>
-                <p className="text-2xl sm:text-3xl text-gray-300 mb-4 font-semibold drop-shadow-lg">
-                  The College & Scholarship Directory
-                </p>
+
                 <p className="text-xl text-gray-400 mb-4 drop-shadow-lg">
                   Explore 6,059 institutions and 126 scholarships
                 </p>
@@ -348,7 +346,7 @@ function RestOfPageContent() {
 
           {/* Short supporting line */}
           <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto mb-10">
-            Abacadaba helps students compare colleges and scholarships with real
+            The College Directory helps students compare colleges and scholarships with real
             information—so their next move is a decision, not a guess.
           </p>
 

@@ -1,7 +1,7 @@
 {
-    "name": "Abacadaba",
-    "short_name": "Abacadaba",
-    "description": "The College & Scholarship Directory",
+    "name": "TheCollegeDirectory",
+    "short_name": "TheCollegeDirectory",
+    "description": "Where institutions create rich, accurate pages that students discover through MagicScholar",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

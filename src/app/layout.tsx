@@ -1,4 +1,4 @@
-// src/app/layout.tsx for Abacadaba (campusconnect-frontend)
+// src/app/layout.tsx for thecollegedirectory (campusconnect-frontend)
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -9,10 +9,10 @@ import { Footer } from "@/components/ui/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://abacadaba.com'),
+  metadataBase: new URL('https://thecollegedirectory.com'),
   title: {
-    default: 'Abacadaba - The College & Scholarship Directory',
-    template: '%s | Abacadaba'
+    default: 'The College Directory - Where institutions create rich, accurate pages that students discover through MagicScholar.ß',
+    template: '%s | The College Directory',
   },
   description: 'The comprehensive directory where colleges and scholarship providers create rich, accurate pages that students discover. Reach qualified prospects with up-to-date information.',
   keywords: [
@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     'college admissions',
     'student recruitment'
   ],
-  authors: [{ name: 'Abacadaba' }],
-  creator: 'Abacadaba',
-  publisher: 'Abacadaba',
+  authors: [{ name: 'The College Directory' }],
+  creator: 'thecollegedirectory',
+  publisher: 'thecollegedirectory',
   formatDetection: {
     email: false,
     address: false,
@@ -45,22 +45,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://abacadaba.com',
-    siteName: 'Abacadaba',
-    title: 'Abacadaba - The College & Scholarship Directory',
+    url: 'https://thecollegedirectory.com',
+    siteName: 'thecollegedirectory',
+    title: 'The College Directory - Where institutions create rich, accurate pages that students discover through MagicScholar.',
     description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
     images: [
       {
         url: '/opengraph-image.png',  // ← This is the key change
         width: 1200,
         height: 630,
-        alt: 'Abacadaba - College & Scholarship Directory',
+        alt: 'thecollegedirectory - College & Scholarship Directory',
       }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Abacadaba - The College & Scholarship Directory',
+    title: 'The College Directory - Where institutions create rich, accurate pages that students discover through MagicScholar.',
     description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
     images: ['/og-image.png'],
   },
@@ -93,7 +93,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="canonical" href="https://abacadaba.com" />
+        <link rel="canonical" href="https://thecollegedirectory.com" />
       </head>
       <body className={inter.className}>
         <Providers>

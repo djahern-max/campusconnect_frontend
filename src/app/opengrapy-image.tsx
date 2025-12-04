@@ -2,7 +2,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'Abacadaba - The College & Scholarship Directory';
+export const alt = 'The College Directory - Where institutions create rich, accurate pages that students discover through MagicScholar.';
 export const size = {
     width: 1200,
     height: 630,
@@ -49,7 +49,7 @@ export default async function Image() {
                     >
                         <span style={{ fontSize: 26 }}>✨</span>
                     </div>
-                    <span style={{ fontWeight: 700, color: '#111827' }}>Abacadaba</span>
+                    <span style={{ fontWeight: 700, color: '#111827' }}>The College Directory</span>
                 </div>
 
                 {/* Middle: main message */}
