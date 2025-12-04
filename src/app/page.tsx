@@ -131,11 +131,9 @@ export default function HomePage() {
                 </h1>
 
                 <p className="text-xl text-gray-400 mb-4 drop-shadow-lg">
-                  Explore 6,059 institutions and 126 scholarships
+                  Explore Colleges & Scholarships
                 </p>
-                <p className="text-lg text-gray-500 mb-8 drop-shadow-lg">
-                  Comprehensive information, virtual tours, and funding opportunities
-                </p>
+
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link href="/institutions">
@@ -323,31 +321,11 @@ function RestOfPageContent() {
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Main slogan */}
-          <p className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">
-            Because choosing a college shouldn&apos;t be{' '}
-            <span className="inline-flex items-baseline gap-2">
-              <span className="text-5xl sm:text-6xl font-bold text-gray-900 leading-none">
-                A
-              </span>
-              <span className="flex items-end gap-1 text-gray-500">
-                <span className="text-2xl sm:text-3xl font-medium">B</span>
-                <span className="text-xl sm:text-2xl font-medium opacity-80">
-                  C
-                </span>
-                <span className="text-lg sm:text-xl font-medium opacity-60">
-                  D
-                </span>
-              </span>
-              <span className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900">
-                guess.
-              </span>
-            </span>
-          </p>
+
 
           {/* Short supporting line */}
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto mb-10">
-            The College Directory helps students compare colleges and scholarships with real
-            information—so their next move is a decision, not a guess.
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-10">
+            Compare colleges and scholarships with real information. Make confident decisions about your education.
           </p>
 
           {/* CTA */}
@@ -368,32 +346,5 @@ function RestOfPageContent() {
         </div>
       </section>
     </>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="bg-white p-8 rounded-lg border border-gray-200 hover:border-gray-400 transition-all hover:shadow-lg">
-      <div className="mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-function StatCard({ number, label }: { number: string; label: string }) {
-  return (
-    <div>
-      <div className="text-5xl font-bold text-gray-900 mb-2">{number}</div>
-      <div className="text-gray-600 text-lg">{label}</div>
-    </div>
   );
 }

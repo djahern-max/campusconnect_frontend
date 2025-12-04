@@ -31,7 +31,7 @@ src/
 │   │   ├── Button.tsx
 │   │   ├── Card.tsx
 │   │   ├── Input.tsx
-│   │   └── Navbar.tsx
+│   │   └─-Header.tsx
 │   └── [feature]/               # Feature-specific components
 ├── hooks/                       # Custom React hooks
 │   ├── useGallery.ts           # Gallery CRUD operations
