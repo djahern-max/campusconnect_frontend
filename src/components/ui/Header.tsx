@@ -97,9 +97,7 @@ export function Header() {
                             <span className="font-bold text-xl sm:text-2xl text-gray-900 tracking-tight">
                                 The College Directory
                             </span>
-                            <span className="text-[10px] sm:text-xs text-gray-500 -mt-0.5">
-                                Discover Your Future
-                            </span>
+
                         </div>
                     </Link>
 
