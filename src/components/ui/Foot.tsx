@@ -1,8 +1,8 @@
 // src/components/ui/Foot.tsx
+// src/components/ui/Footer.tsx - Centered layout
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import { AboutModal } from '../AboutModal';
 
@@ -12,21 +12,9 @@ export function Footer() {
     return (
         <>
             <footer className="bg-gray-950 text-gray-300 mt-auto border-t border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-
-                        {/* Brand */}
-                        <div>
-
-
-                            <p className="text-gray-400 text-sm mb-2">
-                                Discover Your Future
-                            </p>
-
-                            <p className="text-gray-500 text-xs">
-                                Part of the MagicScholar ecosystem.
-                            </p>
-                        </div>
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    {/* Centered grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center sm:text-left max-w-3xl mx-auto">
 
                         {/* Students */}
                         <div>
@@ -75,7 +63,7 @@ export function Footer() {
                                 <li>
                                     <button
                                         onClick={() => setShowAboutModal(true)}
-                                        className="text-gray-400 hover:text-white transition text-left"
+                                        className="text-gray-400 hover:text-white transition"
                                     >
                                         About
                                     </button>
