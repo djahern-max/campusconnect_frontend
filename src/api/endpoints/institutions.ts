@@ -1,3 +1,4 @@
+// src/api/endpoints/institutions.ts
 import apiClient from '../client';
 import type { Institution, AdmissionData, TuitionData, FinancialOverview } from '@/types/api';
 
@@ -12,6 +13,14 @@ interface InstitutionListResponse {
 export const institutionsApi = {
   getAll: async (params?: { state?: string; page?: number; limit?: number }): Promise<InstitutionListResponse> => {
     const response = await apiClient.get<InstitutionListResponse>('/institutions', { params });
+    return response.data;
+  },
+
+  // NEW: Add search endpoint
+  search: async (query: string): Promise<Institution[]> => {
+    const response = await apiClient.get<Institution[]>(`/institutions/search`, {
+      params: { q: query }
+    });
     return response.data;
   },
 

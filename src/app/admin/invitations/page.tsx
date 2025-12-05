@@ -40,74 +40,87 @@ interface Scholarship {
 
 const MESSAGE_TEMPLATES = {
   email_initial: {
-    name: 'Initial Outreach - Personal Story',
-    subject: 'Help a Family Find the Perfect College',
-    body: `Hello {contact_name},
+    name: "Initial Outreach – Free 1-Year Trial",
+    subject: "Free 1-Year Profile for {institution_name}",
+    body: `Hi {contact_name},
 
-I hope this message finds you well. My name is Dane Ahern, and I'm reaching out personally about CampusConnect.
+I'd love to offer {institution_name} a **completely free 1-year profile** on **The College Directory**, a new platform I'm building to help students discover colleges in a more personal and meaningful way.
 
-I built this application for my daughter who is currently looking at colleges and applying for scholarships. I'm just an ordinary family man who loves coding, and I wanted to create something that could help families like mine discover amazing institutions like {institution_name}.
+Your invitation code: **{invitation_code}**  
+Activate here: https://thecollegedirectory.com/register
 
-I would greatly appreciate it if you could try out this application and provide feedback. As a token of appreciation, I'm offering you a 30-day free trial with this invitation code:
+The platform currently uses **IPEDS data as a starting point**, but as you know, federal datasets are often outdated by a year or more. This means students may not be seeing the most accurate reflection of your institution.
 
-**Your Invitation Code:** {invitation_code}
+By joining, you can:
+• Update key data so students see the **most current and accurate information**  
+• Add unlimited photos to showcase your campus  
+• Upload videos, virtual tours, or student interviews  
+• Highlight programs, admissions updates, and unique qualities  
 
-**Register here:** https://campusconnect.com/register
+This gives you the opportunity to present a modern, engaging, and **up-to-date profile** rather than relying only on old IPEDS snapshots.
 
-**What you'll get:**
-- Showcase your campus with unlimited images
-- Add virtual tour videos
-- Enhance your profile with detailed descriptions
-- Only $39.99/month after trial (cancel anytime)
+The core platform will remain free for the first year as we gather feedback from early partners like you.
 
-I truly hope you find this website useful for connecting with prospective students.
+My long-term plan is to offer optional services such as:
+• Custom-designed profile pages  
+• Professional virtual campus tour videos  
+• Student spotlight interviews  
 
-Thank you so much for your time and consideration!
+These optional services help fund development while keeping the directory accessible.
 
-Best regards,
-Dane Ahern
-Founder, CampusConnect`,
+I’d love to have {institution_name} involved as an early test partner and help shape the future of the platform.
+
+Best regards,  
+Dane Ahern  
+Founder, The College Directory`,
   },
+
   email_short: {
-    name: 'Short & Sweet',
-    subject: 'Free 30-day trial for {institution_name}',
+    name: "Short & Direct",
+    subject: "Invitation for {institution_name} – Free 1-Year Profile",
     body: `Hi {contact_name},
 
-Quick message: I've reserved a 30-day free trial of CampusConnect for {institution_name}.
+I'd like to offer {institution_name} a **free 1-year profile** on **The College Directory**.
 
-Code: {invitation_code}
-Link: https://campusconnect.com/register
+Your code: **{invitation_code}**  
+Activate: https://thecollegedirectory.com/register
 
-- Unlimited images
-- Campus tour videos
-- Enhanced profile
-- $39.99/month after trial
+We start with IPEDS as a foundation, but much of that data is out-of-date. Your profile lets you:
+• Update your most current information  
+• Add engaging photos and videos  
+• Showcase programs and campus highlights  
 
-Questions? Just reply!
+Optional services like virtual tour videos and custom profile pages are also available.
 
-Dane Ahern
-CampusConnect`,
+Would love to have you join as an early partner!
+
+Best,  
+Dane`,
   },
+
   linkedin: {
-    name: 'LinkedIn - Professional',
-    subject: '',
+    name: "LinkedIn – Professional",
+    subject: "",
     body: `Hi {contact_name},
 
-I'm reaching out about CampusConnect - a platform I built to help students discover institutions like {institution_name}.
+I'm the founder of **The College Directory**, a platform built to help students explore institutions more meaningfully.
 
-I'm offering {institution_name} a 30-day free trial to enhance your profile with:
-- Unlimited campus photos
-- Virtual tour videos  
-- Detailed program descriptions
+I'd like to offer {institution_name} a **free 1-year profile** with no commitments.
 
-Invitation code: {invitation_code}
-Register: https://campusconnect.com/register
+Invitation code: {invitation_code}  
+Register: https://thecollegedirectory.com/register
 
-Would love your feedback as we're constantly improving!
+We use **IPEDS as a baseline**, but since those datasets can be outdated, this gives you the opportunity to ensure students see **current, accurate information**, along with engaging photos, videos, and campus highlights.
 
-- Dane Ahern`,
+Optional services like virtual campus tour videos, custom page design, and student interviews are available if you'd like additional support.
+
+Would love to have you as an early test partner!
+
+– Dane`,
   },
 };
+
+
 
 export default function InvitationManagerPage() {
   const router = useRouter();
@@ -136,6 +149,8 @@ export default function InvitationManagerPage() {
   const [entityId, setEntityId] = useState('');
   const [assignedEmail, setAssignedEmail] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('30');
+  const [institutionSearch, setInstitutionSearch] = useState('');
+  const [showInstitutionDropdown, setShowInstitutionDropdown] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -148,7 +163,6 @@ export default function InvitationManagerPage() {
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchInvitations();
-      fetchInstitutions();
       fetchScholarships();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,6 +184,13 @@ export default function InvitationManagerPage() {
       setGeneratedMessage('');
     }
   }, [contactName, selectedTemplate, selectedInvitation]);
+
+  const filteredInstitutions =
+    entityType === 'institution'
+      ? institutions.filter((inst) =>
+        inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
+      )
+      : institutions;
 
   const fetchEntityNameById = async (
     type: string,
@@ -238,29 +259,39 @@ export default function InvitationManagerPage() {
     }
   };
 
-  const fetchInstitutions = async () => {
+  const searchInstitutions = async (query: string) => {
+    if (!query || query.length < 2) {
+      setInstitutions([]);
+      setShowInstitutionDropdown(false);
+      return;
+    }
+
     try {
       const response = await fetch(
-        `${API_URL}/api/v1/institutions?limit=100`
+        `${API_URL}/api/v1/institutions/search?q=${encodeURIComponent(query)}`
       );
-      if (response.ok) {
-        const data = await response.json();
 
-        // ✅ Handle paginated response
-        if (data.institutions && Array.isArray(data.institutions)) {
-          setInstitutions(data.institutions);  // Extract the array
-        } else if (Array.isArray(data)) {
-          setInstitutions(data);  // Fallback for non-paginated
-        } else {
-          console.error('Unexpected institutions response:', data);
-          setInstitutions([]);
-        }
+      if (!response.ok) {
+        console.error("Search failed");
+        return;
       }
+
+      const data = await response.json();
+
+      setInstitutions(
+        data.map((inst: any) => ({
+          id: inst.id,
+          name: inst.name
+        }))
+      );
+      setShowInstitutionDropdown(data.length > 0);
     } catch (err) {
-      console.error('Error fetching institutions:', err);
-      setInstitutions([]);
+      console.error("Error searching institutions:", err);
     }
   };
+
+
+
 
   const fetchScholarships = async () => {
     try {
@@ -548,37 +579,82 @@ export default function InvitationManagerPage() {
                 </select>
               </div>
 
+
               {/* Entity Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {entityType === 'institution'
-                    ? 'Institution'
-                    : 'Scholarship'}
+                  {entityType === 'institution' ? 'Institution' : 'Scholarship'}
                 </label>
-                <select
-                  value={entityId}
-                  onChange={(e) => setEntityId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">
-                    Select{' '}
-                    {entityType === 'institution'
-                      ? 'an institution'
-                      : 'a scholarship'}
-                  </option>
-                  {entityType === 'institution'
-                    ? institutions.map((inst) => (
-                      <option key={inst.id} value={inst.id}>
-                        {inst.name}
-                      </option>
-                    ))
-                    : scholarships.map((sch) => (
+
+                {entityType === 'institution' ? (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Start typing institution name (e.g., Harvard, Stanford)..."
+                      value={institutionSearch}
+                      onChange={(e) => {
+                        setInstitutionSearch(e.target.value);
+                        searchInstitutions(e.target.value);
+                      }}
+                      onFocus={() => {
+                        if (institutions.length > 0) {
+                          setShowInstitutionDropdown(true);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
+                    {/* Dropdown Results */}
+                    {showInstitutionDropdown && institutions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {institutions.map((inst) => (
+                          <button
+                            key={inst.id}
+                            type="button"
+                            onClick={() => {
+                              setEntityId(inst.id.toString());
+                              setInstitutionSearch(inst.name);
+                              setShowInstitutionDropdown(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors ${entityId === inst.id.toString() ? 'bg-blue-100 font-medium' : ''
+                              }`}
+                          >
+                            {inst.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Show message when typing but no results */}
+                    {institutionSearch.length >= 2 && institutions.length === 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-sm text-gray-500">
+                        No institutions found matching "{institutionSearch}"
+                      </div>
+                    )}
+
+                    {/* Selected institution indicator */}
+                    {entityId && institutionSearch && (
+                      <div className="mt-2 text-sm text-green-600 flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Selected: {institutionSearch}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <select
+                    value={entityId}
+                    onChange={(e) => setEntityId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select a scholarship</option>
+                    {scholarships.map((sch) => (
                       <option key={sch.id} value={sch.id}>
                         {sch.title}
                       </option>
                     ))}
-                </select>
+                  </select>
+                )}
               </div>
 
               {/* Assigned Email */}

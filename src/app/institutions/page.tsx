@@ -1,13 +1,13 @@
 //src/app/institutions/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Users, Search, Loader2 } from 'lucide-react';
+import { MapPin, Users, Search, Loader2, X } from 'lucide-react';
 import { institutionsApi } from '@/api/endpoints/institutions';
 import type { Institution } from '@/types/api';
 
@@ -19,7 +19,7 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
-const ITEMS_PER_PAGE = 24; // Show 24 institutions per page (8 rows of 3)
+const ITEMS_PER_PAGE = 24;
 
 interface InstitutionListResponse {
   institutions: Institution[];
@@ -33,7 +33,9 @@ export default function InstitutionsPage() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
+  const [searchResults, setSearchResults] = useState<Institution[]>([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,14 +43,15 @@ export default function InstitutionsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch institutions
+  // Determine if we're in search mode
+  const isSearchMode = searchTerm.length >= 2;
+
+  // Fetch institutions (paginated by state)
   useEffect(() => {
     const fetchInstitutions = async () => {
       try {
         setIsLoading(true);
         setError(null);
-
-        console.log('Fetching:', `http://localhost:8000/api/v1/institutions/?page=${currentPage}&limit=${ITEMS_PER_PAGE}`);
 
         const data: InstitutionListResponse = await institutionsApi.getAll({
           page: currentPage,
@@ -56,13 +59,9 @@ export default function InstitutionsPage() {
           ...(selectedState && { state: selectedState })
         });
 
-        console.log('API Response:', data);
-
-        // data is { institutions: [...], total, page, limit, has_more }
         setInstitutions(data.institutions);
         setTotalCount(data.total);
         setHasMore(data.has_more);
-        setDisplayedCount(ITEMS_PER_PAGE);
       } catch (err) {
         console.error('Error fetching institutions:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch institutions');
@@ -71,41 +70,58 @@ export default function InstitutionsPage() {
       }
     };
 
-    fetchInstitutions();
-  }, [selectedState, currentPage]);
+    // Only fetch paginated data if NOT in search mode
+    if (!isSearchMode) {
+      fetchInstitutions();
+    }
+  }, [selectedState, currentPage, isSearchMode]);
 
-  // Separate effect for client-side search filtering
+  // Debounced search
   useEffect(() => {
-    setDisplayedCount(ITEMS_PER_PAGE);
+    const searchInstitutions = async () => {
+      if (searchTerm.length < 2) {
+        setSearchResults([]);
+        setShowSearchDropdown(false);
+        return;
+      }
+
+      try {
+        setIsSearching(true);
+        const results = await institutionsApi.search(searchTerm);
+        setSearchResults(results);
+        setShowSearchDropdown(results.length > 0);
+      } catch (err) {
+        console.error('Error searching institutions:', err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      searchInstitutions();
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const handleLoadMore = () => {
-    if (displayedCount < filteredInstitutions.length) {
-      // Still have items to display from current data
-      setIsLoadingMore(true);
-      setTimeout(() => {
-        const newCount = displayedCount + ITEMS_PER_PAGE;
-        setDisplayedCount(newCount);
-        setIsLoadingMore(false);
-      }, 300);
-    } else if (hasMore) {
-      // Need to fetch next page from API
+    if (hasMore && !isSearchMode) {
       setCurrentPage(prev => prev + 1);
     }
   };
 
-  // Filter institutions by search term (client-side)
-  const filteredInstitutions = institutions.filter(institution => {
-    if (!searchTerm) return true;
-    const search = searchTerm.toLowerCase();
-    return (
-      institution.name.toLowerCase().includes(search) ||
-      institution.city.toLowerCase().includes(search)
-    );
-  });
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setSearchResults([]);
+    setShowSearchDropdown(false);
+    setCurrentPage(1);
+  };
 
-  const displayedInstitutions = filteredInstitutions.slice(0, displayedCount);
-  const canLoadMore = displayedCount < filteredInstitutions.length || hasMore;
+  // Display logic
+  const displayedInstitutions = isSearchMode ? searchResults : institutions;
+  const displayTotal = isSearchMode ? searchResults.length : totalCount;
+  const canLoadMore = !isSearchMode && hasMore;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -123,23 +139,70 @@ export default function InstitutionsPage() {
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Search */}
+            {/* Search with Dropdown */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
               <Input
                 type="text"
                 placeholder="Search by name or city..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                onFocus={() => {
+                  if (searchResults.length > 0) {
+                    setShowSearchDropdown(true);
+                  }
+                }}
+                className="pl-10 pr-10"
               />
+              {searchTerm && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+              {isSearching && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-gray-400" />
+              )}
+
+              {/* Search Dropdown */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                  {searchResults.map((inst) => (
+                    <Link
+                      key={inst.ipeds_id}
+                      href={`/institutions/${inst.ipeds_id}`}
+                      onClick={() => setShowSearchDropdown(false)}
+                      className="block px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="font-medium text-gray-900">{inst.name}</div>
+                      <div className="text-sm text-gray-600 flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {inst.city}, {inst.state}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* No results message */}
+              {searchTerm.length >= 2 && !isSearching && searchResults.length === 0 && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-sm text-gray-600">
+                  No institutions found matching "{searchTerm}"
+                </div>
+              )}
             </div>
 
             {/* State Filter */}
             <select
               value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setCurrentPage(1);
+              }}
+              disabled={isSearchMode}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">All States</option>
               {US_STATES.map(state => (
@@ -151,11 +214,14 @@ export default function InstitutionsPage() {
           {(selectedState || searchTerm) && (
             <div className="mt-4 flex items-center gap-2">
               <span className="text-sm text-gray-600">Active filters:</span>
-              {selectedState && (
+              {selectedState && !isSearchMode && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setSelectedState('')}
+                  onClick={() => {
+                    setSelectedState('');
+                    setCurrentPage(1);
+                  }}
                   className="text-xs"
                 >
                   State: {selectedState} ×
@@ -165,7 +231,7 @@ export default function InstitutionsPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setSearchTerm('')}
+                  onClick={handleClearSearch}
                   className="text-xs"
                 >
                   Search: "{searchTerm}" ×
@@ -176,7 +242,7 @@ export default function InstitutionsPage() {
         </div>
 
         {/* Results */}
-        {isLoading && (
+        {isLoading && !isSearchMode && (
           <div className="text-center py-12">
             <Loader2 className="inline-block animate-spin h-12 w-12 text-primary-600 mb-4" />
             <p className="text-gray-600">Loading institutions...</p>
@@ -195,11 +261,14 @@ export default function InstitutionsPage() {
           </div>
         )}
 
-        {!isLoading && !error && filteredInstitutions.length > 0 && (
+        {!isLoading && !error && displayedInstitutions.length > 0 && (
           <>
             <div className="mb-4 text-gray-600">
-              Showing {displayedInstitutions.length.toLocaleString()} of {filteredInstitutions.length.toLocaleString()} institution{filteredInstitutions.length !== 1 ? 's' : ''}
-              {searchTerm && ` matching "${searchTerm}"`}
+              {isSearchMode ? (
+                <>Found {searchResults.length.toLocaleString()} institution{searchResults.length !== 1 ? 's' : ''} matching "{searchTerm}"</>
+              ) : (
+                <>Showing {institutions.length.toLocaleString()} of {totalCount.toLocaleString()} institution{totalCount !== 1 ? 's' : ''}</>
+              )}
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -241,32 +310,31 @@ export default function InstitutionsPage() {
                           </div>
                         )}
 
-                        <div className="mt-3 flex items-center justify-between">
+                        {/* <div className="mt-3 flex items-center justify-between">
                           {institution.control_type && (
                             <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
-                              ? 'bg-blue-100 text-blue-800'
-                              : institution.control_type === 'PRIVATE_NONPROFIT'
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-blue-100 text-blue-800'
+                                : institution.control_type === 'PRIVATE_NONPROFIT'
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : 'bg-gray-100 text-gray-800'
                               }`}>
                               {institution.control_type.replace(/_/g, ' ')}
                             </span>
                           )}
 
-                          {/* Show completeness score as a badge */}
                           {institution.data_completeness_score !== undefined && (
                             <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
-                              ? 'bg-green-100 text-green-800'
-                              : institution.data_completeness_score >= 60
-                                ? 'bg-blue-100 text-blue-800'
-                                : institution.data_completeness_score >= 40
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                ? 'bg-green-100 text-green-800'
+                                : institution.data_completeness_score >= 60
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : institution.data_completeness_score >= 40
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-gray-100 text-gray-800'
                               }`}>
                               {institution.data_completeness_score}% Complete
                             </span>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                     </CardBody>
                   </Card>
@@ -274,8 +342,8 @@ export default function InstitutionsPage() {
               ))}
             </div>
 
-            {/* Load More Button */}
-            {canLoadMore && !isLoading && (
+            {/* Load More Button - Only show when NOT in search mode */}
+            {canLoadMore && !isSearchMode && (
               <div className="mt-8 flex justify-center">
                 <Button
                   onClick={handleLoadMore}
@@ -292,9 +360,7 @@ export default function InstitutionsPage() {
                     <>
                       Load More
                       <span className="ml-2 text-sm opacity-75">
-                        ({displayedCount < filteredInstitutions.length
-                          ? Math.min(ITEMS_PER_PAGE, filteredInstitutions.length - displayedCount)
-                          : ITEMS_PER_PAGE} more)
+                        ({ITEMS_PER_PAGE} more)
                       </span>
                     </>
                   )}
@@ -303,7 +369,7 @@ export default function InstitutionsPage() {
             )}
 
             {/* End message */}
-            {!canLoadMore && displayedCount > ITEMS_PER_PAGE && (
+            {!hasMore && !isSearchMode && institutions.length > ITEMS_PER_PAGE && (
               <div className="mt-8 text-center text-gray-600">
                 <p>You've reached the end of the results</p>
                 <Button
@@ -318,27 +384,14 @@ export default function InstitutionsPage() {
           </>
         )}
 
-        {!isLoading && !error && filteredInstitutions.length === 0 && institutions.length > 0 && (
+        {!isLoading && !error && displayedInstitutions.length === 0 && !isSearchMode && (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No institutions found matching "{searchTerm}".</p>
-            <Button
-              variant="ghost"
-              onClick={() => setSearchTerm('')}
-              className="mt-4"
-            >
-              Clear search
-            </Button>
-          </div>
-        )}
-
-        {!isLoading && !error && institutions.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No institutions found matching your criteria.</p>
+            <p className="text-gray-600 mb-4">No institutions found{selectedState && ` in ${selectedState}`}.</p>
             <Button
               variant="ghost"
               onClick={() => {
                 setSelectedState('');
-                setSearchTerm('');
+                setCurrentPage(1);
               }}
               className="mt-4"
             >
