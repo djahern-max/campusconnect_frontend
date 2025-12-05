@@ -3,6 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useGallery } from '@/hooks/useGallery';
 import type { GalleryImage } from '@/api/endpoints/gallery';
 import {
@@ -21,7 +22,8 @@ import {
   AlertTriangle,
   Info,
   X,
-  Plus
+  Plus,
+  ArrowLeft,
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -325,7 +327,17 @@ export default function AdminGalleryPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* ADD THIS BACK BUTTON */}
+        <div className="mb-4">
+          <Link
+            href="/admin/dashboard"
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
