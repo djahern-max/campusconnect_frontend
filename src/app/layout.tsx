@@ -49,14 +49,7 @@ export const metadata: Metadata = {
     siteName: 'thecollegedirectory',
     title: 'The College Directory - Where institutions create rich, accurate pages that students discover through MagicScholar.',
     description: 'Where colleges and scholarship providers create rich, accurate pages that students discover.',
-    images: [
-      {
-        url: '/opengraph-image.png',  // ← This is the key change
-        width: 1200,
-        height: 630,
-        alt: 'thecollegedirectory - College & Scholarship Directory',
-      }
-    ],
+
   },
   twitter: {
     card: 'summary_large_image',
