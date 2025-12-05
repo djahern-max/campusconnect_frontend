@@ -98,7 +98,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div>
-        <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
+        <section className="relative min-h-[650px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] bg-gray-900 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black animate-pulse" />
           <div className="relative h-full flex flex-col justify-end pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -122,7 +122,7 @@ export default function HomePage() {
   if (featuredSlides.length === 0) {
     return (
       <div>
-        <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
+        <section className="relative min-h-[650px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] bg-gray-900 overflow-hidden">
           <div className="relative h-full flex flex-col justify-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center">
               <div className="text-white">
@@ -169,7 +169,7 @@ export default function HomePage() {
 
 
       {/* Hero Section with Featured Image Carousel */}
-      <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
+      <section className="relative min-h-[650px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] bg-gray-900 overflow-hidden">
         {/* Carousel Images */}
         <div className="absolute inset-0">
           {featuredSlides.map((slide, index) => (
@@ -182,7 +182,7 @@ export default function HomePage() {
                 src={slide.cdn_url || slide.image_url}
                 alt={slide.caption || slide.entity_name}
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 priority={index < 3}
                 quality={95}
                 sizes="100vw"

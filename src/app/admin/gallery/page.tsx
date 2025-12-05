@@ -1,4 +1,4 @@
-// src/app/admin/gallery/page.tsx
+//src/app/admin/gallery/page.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
