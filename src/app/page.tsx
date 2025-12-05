@@ -166,6 +166,8 @@ export default function HomePage() {
 
   return (
     <div>
+
+
       {/* Hero Section with Featured Image Carousel */}
       <section className="relative h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
         {/* Carousel Images */}
@@ -185,155 +187,166 @@ export default function HomePage() {
                 quality={95}
                 sizes="100vw"
               />
-              {/* Lightened overlay gradient for better image visibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              {/* Stronger gradient for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
             </div>
           ))}
         </div>
 
         {/* Content Overlay */}
-        <div className="relative h-full flex flex-col justify-end pb-12 md:pb-16">
+        <div className="relative h-full flex flex-col justify-end pb-16 md:pb-20 lg:pb-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="text-white">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-                Find Your Perfect College
-              </h1>
+            {activeSlide ? (
+              <div className="text-white space-y-6">
+                {/* College/Scholarship Name - THE HERO */}
+                <Link
+                  href={
+                    activeSlide.entity_type === 'institution'
+                      ? `/institutions/${activeSlide.entity_ipeds_id}`
+                      : `/scholarships/${activeSlide.entity_id}`
+                  }
+                  className="group inline-block"
+                >
+                  <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] group-hover:text-gray-200 transition-colors leading-tight">
+                    {activeSlide.entity_name}
+                    <ArrowRight className="inline-block ml-4 h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all" />
+                  </h1>
+                </Link>
 
-              {activeSlide && (
-                <div className="mb-8">
-                  <Link
-                    href={
-                      activeSlide.entity_type === 'institution'
-                        ? `/institutions/${activeSlide.entity_ipeds_id}`
-                        : `/scholarships/${activeSlide.entity_id}`
-                    }
-                    className="group inline-block"
-                  >
-                    <p className="text-xl sm:text-2xl text-gray-200 mb-2 group-hover:text-white transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                      {activeSlide.entity_name}
-                      <ArrowRight className="inline-block ml-2 h-6 w-6 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                    </p>
-                  </Link>
+                {/* Location */}
+                {activeSlide.entity_city && activeSlide.entity_state && (
+                  <p className="text-2xl sm:text-3xl md:text-4xl text-gray-100 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-light">
+                    {activeSlide.entity_city}, {activeSlide.entity_state}
+                  </p>
+                )}
 
-                  {activeSlide.entity_city && activeSlide.entity_state && (
-                    <p className="text-lg text-gray-300 mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                      {activeSlide.entity_city}, {activeSlide.entity_state}
-                    </p>
-                  )}
+                {/* Caption */}
+                {activeSlide.caption && (
+                  <p className="text-xl sm:text-2xl text-gray-200 italic max-w-4xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] leading-relaxed">
+                    "{activeSlide.caption}"
+                  </p>
+                )}
 
-                  {activeSlide.caption && (
-                    <p className="text-md text-gray-400 italic max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                      "{activeSlide.caption}"
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Buttons with backdrop for better visibility */}
-              <div className="inline-block bg-black/30 backdrop-blur-sm p-4 sm:p-6 rounded-xl">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href="/institutions">
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-lg"
-                    >
-                      <Search className="mr-2 h-5 w-5 text-black" />
-                      Explore Institutions
-                    </Button>
-                  </Link>
-                  <Link href="/scholarships">
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="w-full sm:w-auto bg-white/90 !text-black border-2 border-white hover:bg-white shadow-lg"
-                    >
-                      <DollarSign className="mr-2 h-5 w-5 text-black" />
-                      Find Scholarships
-                    </Button>
-                  </Link>
+                {/* CTAs with enhanced backdrop */}
+                <div className="pt-4">
+                  <div className="inline-block bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <Link href="/institutions">
+                        <Button
+                          variant="primary"
+                          size="lg"
+                          className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+                        >
+                          <Search className="mr-2 h-5 w-5 text-black" />
+                          Explore Institutions
+                        </Button>
+                      </Link>
+                      <Link href="/scholarships">
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          className="w-full sm:w-auto bg-white/10 !text-white border-2 border-white hover:bg-white/20 shadow-xl hover:shadow-2xl transition-all hover:scale-105 backdrop-blur-sm"
+                        >
+                          <DollarSign className="mr-2 h-5 w-5" />
+                          Find Scholarships
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Fallback if no slide - shouldn't happen but good to have */}
+                <div className="text-white">
+                  <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6">
+                    Discover Your Future
+                  </h1>
+                  <p className="text-2xl sm:text-3xl text-gray-200 mb-8">
+                    Explore thousands of colleges and scholarships
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {/* Carousel Controls - Only show if multiple slides */}
-        {featuredSlides.length > 1 && (
-          <>
-            {/* Previous/Next Buttons - more visible */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-lg"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
+        {
+          featuredSlides.length > 1 && (
+            <>
+              {/* Previous/Next Buttons */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-4 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-2xl"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-4 rounded-full backdrop-blur-sm transition-all hover:scale-110 shadow-2xl"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
+              </button>
 
-            {/* Dot Indicators */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
-              {featuredSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentSlide(index);
-                    setIsAutoPlaying(false);
-                  }}
-                  className={`h-2 rounded-full transition-all ${index === currentSlide
-                    ? 'bg-white w-8'
-                    : 'bg-white/50 hover:bg-white/75 w-2'
-                    }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={index === currentSlide ? 'true' : undefined}
-                />
-              ))}
-            </div>
+              {/* Dot Indicators */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3">
+                {featuredSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentSlide(index);
+                      setIsAutoPlaying(false);
+                    }}
+                    className={`h-3 rounded-full transition-all ${index === currentSlide
+                      ? 'bg-white w-12'
+                      : 'bg-white/50 hover:bg-white/75 w-3'
+                      }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                    aria-current={index === currentSlide ? 'true' : undefined}
+                  />
+                ))}
+              </div>
 
-            {/* Image Counter - more prominent */}
-            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-base font-semibold shadow-lg">
-              {currentSlide + 1} / {featuredSlides.length}
-            </div>
-          </>
-        )}
-      </section>
+              {/* Image Counter */}
+              <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-md text-white px-5 py-2.5 rounded-xl text-lg font-semibold shadow-2xl border border-white/10">
+                {currentSlide + 1} / {featuredSlides.length}
+              </div>
+            </>
+          )
+        }
+      </section >
 
       <RestOfPageContent />
-    </div>
+    </div >
   );
 }
 
 function RestOfPageContent() {
   return (
     <>
-      {/* Slogan + Institutions CTA */}
+      {/* Institutional CTA Section - Clean White */}
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Main slogan */}
 
+          {/* Updated heading */}
+          <p className="text-2xl font-medium text-gray-500 mb-6">
+            Represent a college or scholarship?
+          </p>
 
+          <Link href="/contact">
+            <Button
+              variant="primary"
+              size="lg"
+              className="bg-gray-900 hover:bg-gray-800 !text-white shadow-lg hover:shadow-xl transition-all"
+            >
+              List Your Institution
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
 
-          {/* CTA */}
-          <div className="space-y-4">
-            <p className="text-sm sm:text-base text-gray-600">
-              Represent a college or scholarship?
-            </p>
-            <Link href="/contact">
-              <Button
-                variant="primary"
-                size="lg"
-                className="bg-gray-900 hover:bg-gray-800 !text-white shadow-lg"
-              >
-                List Your Institution
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
     </>
