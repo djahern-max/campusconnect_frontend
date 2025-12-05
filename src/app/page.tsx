@@ -169,7 +169,7 @@ export default function HomePage() {
 
 
       {/* Hero Section with Featured Image Carousel */}
-      <section className="relative min-h-[650px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] bg-gray-900 overflow-hidden">
+      <section className="relative min-h-[650px] sm:min-h-[600px] md:min-h-[650px] lg:min-h-[700px] bg-gray-900 overflow-hidden flex items-center justify-center">
         {/* Carousel Images */}
         <div className="absolute inset-0">
           {featuredSlides.map((slide, index) => (
@@ -193,10 +193,9 @@ export default function HomePage() {
           ))}
         </div>
 
-
         {/* Content Overlay */}
-        <div className="relative h-full flex flex-col justify-end pb-20 sm:pb-24 md:pb-28 lg:pb-32 xl:pb-36">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="relative z-10 w-full">
+          <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 mx-auto text-center">
             {activeSlide ? (
               <div className="text-white space-y-4 sm:space-y-5 md:space-y-6">
                 {/* College/Scholarship Name - THE HERO */}
@@ -213,21 +212,18 @@ export default function HomePage() {
                     <ArrowRight className="inline-block ml-3 sm:ml-4 h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all" />
                   </h1>
                 </Link>
-
                 {/* Location */}
                 {activeSlide.entity_city && activeSlide.entity_state && (
                   <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-100 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-light">
                     {activeSlide.entity_city}, {activeSlide.entity_state}
                   </p>
                 )}
-
                 {/* Caption */}
                 {activeSlide.caption && (
-                  <p className="text-lg sm:text-xl md:text-2xl text-gray-200 italic max-w-4xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] leading-relaxed">
+                  <p className="text-lg sm:text-xl md:text-2xl text-gray-200 italic max-w-4xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] leading-relaxed mx-auto">
                     "{activeSlide.caption}"
                   </p>
                 )}
-
                 {/* CTAs with enhanced backdrop */}
                 <div className="pt-3 sm:pt-4">
                   <div className="inline-block bg-black/40 backdrop-blur-md p-4 sm:p-5 md:p-6 rounded-2xl border border-white/10">
@@ -257,7 +253,6 @@ export default function HomePage() {
                 </div>
               </div>
             ) : (
-
               <>
                 {/* Fallback if no slide - shouldn't happen but good to have */}
                 <div className="text-white">
