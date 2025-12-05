@@ -149,19 +149,29 @@ export default function HomePage() {
                   }
                   className="group inline-block"
                 >
-                  <h1 className="
-                    text-white/70
-                    text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
-                    font-bold leading-tight
-                    drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
-                    transition-colors
-                    group-hover:text-white
-                  ">
+                  <h1
+                    className="
+    text-white/90
+    italic
+    text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+    font-bold
+    leading-tight
+    drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
+    transition-colors
+    group-hover:text-white
+  "
+                  >
                     {activeSlide.entity_name}
                     <ArrowRight
-                      className="inline-block ml-3 h-8 w-8 sm:h-10 sm:w-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all"
+                      className="
+      inline-block ml-3
+      h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12
+      opacity-0 group-hover:opacity-100 group-hover:translate-x-2
+      transition-all
+    "
                     />
                   </h1>
+
                 </Link>
 
                 {/* LOCATION */}
