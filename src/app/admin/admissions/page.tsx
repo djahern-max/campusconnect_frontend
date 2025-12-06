@@ -10,7 +10,7 @@ import { PercentageInput } from '@/components/admin/forms/PercentageInput';
 import { ScoreInput } from '@/components/admin/forms/ScoreInput';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Institution } from '@/types/api';
+import { Institution } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

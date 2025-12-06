@@ -1,7 +1,7 @@
 // src/components/public/TuitionCard.tsx
 import React from 'react';
 import Badge from '@/components/ui/Badge';
-import { TuitionData } from '@/types/api';
+import { TuitionData } from '@/types';
 
 interface TuitionCardProps {
     tuition: TuitionData;

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Calendar, DollarSign, GraduationCap, Award, MapPin, ExternalLink, CheckCircle } from 'lucide-react';
 import scholarshipsApi from '@/api/endpoints/scholarships';
-import { Scholarship } from '@/types/api';
+import { Scholarship } from '@/types';
 
 export default function ScholarshipDetailPage() {
     const router = useRouter();

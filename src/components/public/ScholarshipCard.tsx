@@ -1,6 +1,6 @@
 // src/components/public/ScholarshipCard.tsx
 import React from 'react';
-import { Scholarship } from '@/types/api';
+import { Scholarship } from '@/types';
 import { MapPin, Calendar, Award } from 'lucide-react';
 
 interface ScholarshipCardProps {

@@ -2,7 +2,7 @@
 import React from 'react';
 import Badge from '@/components/ui/Badge';
 import StatCard from '@/components/ui/StatCard';
-import { AdmissionData } from '@/types/api';
+import { AdmissionData } from '@/types';
 
 interface AdmissionsCardProps {
     admissions: AdmissionData;

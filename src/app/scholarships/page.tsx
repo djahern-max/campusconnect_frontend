@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Search, Filter, X, Loader2 } from 'lucide-react';
 import scholarshipsApi from '@/api/endpoints/scholarships';
 import ScholarshipCard from '@/components/public/ScholarshipCard';
-import { Scholarship } from '@/types/api';
+import { Scholarship } from '@/types';
 import { Button } from '@/components/ui/Button';
 
 const ITEMS_PER_PAGE = 24;

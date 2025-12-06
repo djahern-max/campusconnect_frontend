@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AdminUser } from '@/types/api';
+import type { AdminUser } from '@/types';
 
 interface AuthState {
   token: string | null;

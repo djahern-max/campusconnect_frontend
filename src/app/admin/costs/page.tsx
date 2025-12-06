@@ -9,7 +9,7 @@ import { DataSection } from '@/components/admin/forms/DataSection';
 import { CurrencyInput } from '@/components/admin/forms/CurrencyInput';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Institution } from '@/types/api';
+import { Institution } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

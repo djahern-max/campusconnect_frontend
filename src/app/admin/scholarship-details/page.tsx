@@ -19,7 +19,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import type { Scholarship } from '@/types/api';
+import type { Scholarship } from '@/types';
 import { DataSection } from '@/components/admin/forms/DataSection';
 import { NumberInput } from '@/components/admin/forms/NumberInput';
 import { SelectInput } from '@/components/admin/forms/SelectInput';

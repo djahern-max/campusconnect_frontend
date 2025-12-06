@@ -2,7 +2,7 @@
 import React from 'react';
 import TuitionCard from './TuitionCard';
 import AdmissionsCard from './AdmissionsCard';
-import { FinancialOverview as FinancialOverviewType } from '@/types/api';
+import { FinancialOverview as FinancialOverviewType } from '@/types';
 
 interface FinancialOverviewProps {
     data: FinancialOverviewType;

@@ -1,6 +1,6 @@
 // src/api/endpoints/scholarships.ts
 import apiClient from '@/api/client';
-import { Scholarship } from '@/types/api';
+import { Scholarship } from '@/types';
 
 interface ScholarshipListResponse {
     scholarships: Scholarship[];

@@ -6,7 +6,7 @@ import {
     updateInstitutionData,
     getInstitutionQuality
 } from '@/api/endpoints/institutions';
-import type { Institution } from '@/types/api';
+import type { Institution } from '@/types';
 
 interface UseInstitutionDataReturn {
     data: Institution | null;

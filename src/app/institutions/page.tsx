@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Users, Search, Loader2, X } from 'lucide-react';
 import { institutionsApi } from '@/api/endpoints/institutions';
-import type { Institution } from '@/types/api';
+import type { Institution } from '@/types';
 
 const US_STATES = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',

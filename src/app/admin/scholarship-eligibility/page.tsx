@@ -16,7 +16,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import type { Scholarship } from '@/types/api';
+import type { Scholarship } from '@/types';
 import { DataSection } from '@/components/admin/forms/DataSection';
 import { GpaInput } from '@/components/admin/forms/GpaInput';
 
