@@ -1,6 +1,12 @@
 // src/hooks/useInstitutionData.ts
 import { useState, useEffect, useCallback } from 'react';
-import { getInstitutionComplete, updateBasicInfo, updateCostData, updateAdmissionsData } from '@/api/endpoints/institutions';
+import {
+    getInstitutionComplete,
+    updateBasicInfo,
+    updateCostData,
+    updateAdmissionsData,
+    getInstitutionQuality
+} from '@/api/endpoints/institutions';
 import type { Institution } from '@/types/api';
 
 interface UseInstitutionDataReturn {
@@ -10,6 +16,22 @@ interface UseInstitutionDataReturn {
     updateField: (field: keyof Institution, value: any) => Promise<void>;
     refetch: () => Promise<void>;
     saving: boolean;
+}
+
+interface QualityMetrics {
+    completeness_score: number;
+    data_freshness: string;
+    missing_fields: string[];
+    needs_verification: boolean;
+    last_verified: string | null;
+    verification_status: string;
+}
+
+interface UseInstitutionDataQualityReturn {
+    quality: QualityMetrics | null;
+    loading: boolean;
+    error: string | null;
+    refetch: () => Promise<void>;
 }
 
 // Helper to determine which endpoint to use based on field
@@ -132,5 +154,52 @@ export const useInstitutionData = (institutionId: number | null): UseInstitution
         updateField,
         refetch,
         saving,
+    };
+};
+
+/**
+ * Custom hook for managing institution data quality metrics
+ * Fetches and tracks data quality, completeness, and verification status
+ */
+export const useInstitutionDataQuality = (institutionId: number | null): UseInstitutionDataQualityReturn => {
+    const [quality, setQuality] = useState<QualityMetrics | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch quality metrics
+    const fetchQuality = useCallback(async () => {
+        if (!institutionId) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+            const qualityData = await getInstitutionQuality(institutionId);
+            setQuality(qualityData);
+        } catch (err: any) {
+            console.error('Error fetching quality metrics:', err);
+            setError(err.response?.data?.detail || 'Failed to load quality metrics');
+        } finally {
+            setLoading(false);
+        }
+    }, [institutionId]);
+
+    // Initial load
+    useEffect(() => {
+        fetchQuality();
+    }, [fetchQuality]);
+
+    // Manual refetch
+    const refetch = useCallback(async () => {
+        await fetchQuality();
+    }, [fetchQuality]);
+
+    return {
+        quality,
+        loading,
+        error,
+        refetch,
     };
 };
