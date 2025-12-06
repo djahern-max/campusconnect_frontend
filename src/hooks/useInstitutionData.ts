@@ -22,15 +22,16 @@ interface QualityMetrics {
     institution_id: number;
     institution_name: string;
     completeness_score: number;
-    data_freshness: string;
     data_source: string;
+    data_last_updated: string;
+    ipeds_year: string | null;
     missing_fields: string[];
     verified_fields: string[];
-    needs_verification: boolean;
-    last_verified: string | null;
-    verification_status: string;
-    data_last_updated: string;
-    ipeds_id?: number;
+    verification_count: number;
+    has_website: boolean;
+    has_tuition_data: boolean;
+    has_room_board: boolean;
+    has_admissions_data: boolean;
 }
 
 interface UseInstitutionDataQualityReturn {
