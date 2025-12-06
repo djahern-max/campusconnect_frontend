@@ -44,7 +44,7 @@ interface UseInstitutionDataQualityReturn {
  * Custom hook for managing institution data
  * Handles loading, updating, and auto-saving institution fields
  */
-export const useInstitutionData = (institutionId: number | null): UseInstitutionDataReturn => {
+export const useInstitutionData = (institutionId: number | null | undefined): UseInstitutionDataReturn => {
     const [data, setData] = useState<Institution | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -121,7 +121,7 @@ export const useInstitutionData = (institutionId: number | null): UseInstitution
  * Custom hook for managing institution data quality metrics
  * Fetches and tracks data quality, completeness, and verification status
  */
-export const useInstitutionDataQuality = (institutionId: number | null): UseInstitutionDataQualityReturn => {
+export const useInstitutionDataQuality = (institutionId: number | null | undefined): UseInstitutionDataQualityReturn => {
     const [quality, setQuality] = useState<QualityMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
