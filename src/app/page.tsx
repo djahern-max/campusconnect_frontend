@@ -151,7 +151,7 @@ export default function HomePage() {
                 >
                   <h1
                     className="
-    text-white/50
+    text-white/70
     italic
     text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
     font-bold
@@ -176,14 +176,14 @@ export default function HomePage() {
 
                 {/* LOCATION */}
                 {activeSlide.entity_city && activeSlide.entity_state && (
-                  <p className="text-white/40 text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+                  <p className="text-white/60 text-xl sm:text-2xl md:text-3xl lg:text-4xl">
                     {activeSlide.entity_city}, {activeSlide.entity_state}
                   </p>
                 )}
 
                 {/* CAPTION */}
                 {activeSlide.caption && (
-                  <p className="text-white/35 text-lg sm:text-xl md:text-2xl italic max-w-4xl">
+                  <p className="text-white/55 text-lg sm:text-xl md:text-2xl italic max-w-4xl">
                     "{activeSlide.caption}"
                   </p>
                 )}
