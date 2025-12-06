@@ -1,6 +1,6 @@
 // src/lib/api/institutions.ts
 import apiClient from '../client';
-import type { Institution } from '@/types/api';
+import type { Institution } from '@/types';
 
 export interface GetInstitutionsParams {
     state?: string;

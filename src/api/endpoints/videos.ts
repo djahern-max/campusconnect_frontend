@@ -1,5 +1,5 @@
 import apiClient from '../client';
-import type { InstitutionVideo } from '@/types/api';
+import type { InstitutionVideo } from '@/types';
 
 export const videosApi = {
   getAll: async () => {
