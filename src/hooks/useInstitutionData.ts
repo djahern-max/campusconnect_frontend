@@ -19,12 +19,15 @@ interface UseInstitutionDataReturn {
 }
 
 interface QualityMetrics {
+    institution_id: number;
+    institution_name: string;
     completeness_score: number;
     data_freshness: string;
     missing_fields: string[];
     needs_verification: boolean;
     last_verified: string | null;
     verification_status: string;
+    ipeds_id?: number;
 }
 
 interface UseInstitutionDataQualityReturn {
