@@ -44,6 +44,9 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, description, icon, href,
 
 
 
+
+
+
   return (
     <button
       onClick={() => router.push(href)}
@@ -90,6 +93,8 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       setShowSaved(true);
     }
   }, [saving, showSaved]);
+
+
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
@@ -142,6 +147,7 @@ export default function AdminDashboard() {
   // Local state for formatted values
   const [formattedValues, setFormattedValues] = useState<Record<string, string>>({});
   const [fieldTimeouts, setFieldTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
+  const [studentFacultyRatio, setStudentFacultyRatio] = useState<string>('');
 
   // Update formatted values when data loads
   useEffect(() => {
@@ -165,8 +171,15 @@ export default function AdminDashboard() {
       });
 
       setFormattedValues(formatted);
+
+      // ✅ ADD THIS: Initialize student-faculty ratio
+      if (data.student_faculty_ratio) {
+        setStudentFacultyRatio(data.student_faculty_ratio.toString());
+      }
     }
   }, [data]);
+
+
 
   const handleFieldChange = (field: string, value: any) => {
     // Clear existing timeout for this field
@@ -413,6 +426,8 @@ export default function AdminDashboard() {
                         <option value="rural">Rural</option>
                       </select>
                     </div>
+
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Student-Faculty Ratio</label>
                       <input
@@ -424,6 +439,8 @@ export default function AdminDashboard() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
+
+
                   </div>
                 </div>
 
