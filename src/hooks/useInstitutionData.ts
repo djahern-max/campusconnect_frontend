@@ -23,6 +23,7 @@ interface QualityMetrics {
     institution_name: string;
     completeness_score: number;
     data_freshness: string;
+    data_source: string;
     missing_fields: string[];
     needs_verification: boolean;
     last_verified: string | null;
