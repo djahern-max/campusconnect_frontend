@@ -29,14 +29,23 @@ function sortInstitutionsByPriorityStates<T extends { state: string }>(instituti
   });
 }
 
-export function useInstitutions(state?: string) {
+// Add page parameter support
+export function useInstitutions(state?: string, page: number = 1) {
   return useQuery({
-    queryKey: ['institutions', state],
+    queryKey: ['institutions', state, page],  // Add page to queryKey
     queryFn: async () => {
-      const data = await institutionsApi.getInstitutions({ state, limit: 100, offset: 0 });
-      // Apply custom sorting if no state filter is active
-      if (!state && Array.isArray(data)) {
-        return sortInstitutionsByPriorityStates(data);
+      const data = await institutionsApi.getInstitutions({
+        state,
+        limit: 100,
+        page  // Use the page parameter
+      });
+
+      // Apply custom sorting if no state filter is active and it's the first page
+      if (!state && page === 1 && data.institutions) {
+        return {
+          ...data,
+          institutions: sortInstitutionsByPriorityStates(data.institutions)
+        };
       }
       return data;
     },

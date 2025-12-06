@@ -6,7 +6,17 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Users, MapPin, DollarSign, GraduationCap } from 'lucide-react';
+import {
+  ArrowLeft,
+  ExternalLink,
+  Users,
+  MapPin,
+  DollarSign,
+  GraduationCap,
+  AlertCircle,
+  CheckCircle,
+  Info
+} from 'lucide-react';
 import { use } from 'react';
 import { publicGalleryApi, GalleryImage } from '@/api/endpoints/publicGallery';
 
@@ -83,6 +93,49 @@ export default function InstitutionDetailPage({
     }).format(amount);
   };
 
+  // Component for displaying missing data with call-to-action
+  const MissingDataIndicator = ({ label, compact = false }: { label: string; compact?: boolean }) => {
+    if (compact) {
+      return (
+        <span className="text-gray-400 italic text-sm">Not available</span>
+      );
+    }
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-900">{label} not available</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Are you from this institution?
+              <Link href="/admin/login" className="underline font-medium ml-1 hover:text-amber-900">
+                Claim this profile
+              </Link> to update this information.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Component for verified data badge
+  const VerifiedBadge = ({ verified, verifiedAt }: { verified: boolean; verifiedAt?: string | null }) => {
+    if (!verified) return null;
+    return (
+      <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <span className="text-xs font-medium text-green-700">
+          Verified by Institution
+          {verifiedAt && (
+            <span className="ml-1 text-green-600">
+              · {new Date(verifiedAt).toLocaleDateString()}
+            </span>
+          )}
+        </span>
+      </div>
+    );
+  };
+
   // Helper function to check if cost data exists
   const hasCostData = () => {
     return Boolean(
@@ -116,10 +169,28 @@ export default function InstitutionDetailPage({
     );
   };
 
+  // Calculate data completeness
+  const calculateCompleteness = () => {
+    const fields = [
+      institution.website,
+      institution.tuition_in_state || institution.tuition_out_of_state || institution.tuition_private,
+      institution.room_and_board || institution.room_cost || institution.board_cost,
+      institution.acceptance_rate,
+      institution.student_faculty_ratio,
+      institution.size_category,
+      galleryImages.length > 0,
+    ];
+    const filledFields = fields.filter(Boolean).length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
+
+  const completeness = calculateCompleteness();
+  const needsImprovement = completeness < 70;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Banner - Featured Image */}
-      {featuredImage && (
+      {featuredImage ? (
         <div className="relative h-64 sm:h-96 w-full">
           <Image
             src={featuredImage.image_url}
@@ -142,6 +213,20 @@ export default function InstitutionDetailPage({
             </p>
           </div>
         </div>
+      ) : (
+        // Fallback gradient banner when no featured image
+        <div className="relative h-64 sm:h-96 w-full bg-gradient-to-br from-primary-600 via-primary-500 to-accent-600">
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
+              {institution.name}
+            </h1>
+            <p className="text-xl text-white/90 mt-2 flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              {institution.city}, {institution.state}
+            </p>
+          </div>
+        </div>
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -154,16 +239,28 @@ export default function InstitutionDetailPage({
           Back to Institutions
         </Link>
 
-        {/* If no featured image, show name here */}
-        {!featuredImage && (
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              {institution.name}
-            </h1>
-            <p className="text-xl text-gray-600 flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              {institution.city}, {institution.state}
-            </p>
+        {/* Data Completeness Alert - Show if profile is incomplete */}
+        {needsImprovement && (
+          <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <Info className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-amber-900 mb-2">
+                  This profile is {completeness}% complete
+                </h3>
+                <p className="text-sm text-amber-800 mb-3">
+                  Some information about this institution is missing or not verified.
+                  This could include costs, admissions data, campus images, or other important details.
+                </p>
+                <Link href="/admin/login">
+                  <Button variant="primary" size="sm">
+                    Are you from {institution.name}? Claim this profile
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         )}
 
@@ -176,7 +273,7 @@ export default function InstitutionDetailPage({
                 {institution.control_type?.replace('_', ' ')}
               </p>
             </div>
-            {institution.website && (
+            {institution.website ? (
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Website</p>
                 <a
@@ -189,14 +286,24 @@ export default function InstitutionDetailPage({
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
+            ) : (
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Website</p>
+                <MissingDataIndicator label="" compact />
+              </div>
             )}
-            {institution.student_faculty_ratio && (
+            {institution.student_faculty_ratio ? (
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Student-Faculty Ratio</p>
                 <p className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   {institution.student_faculty_ratio}:1
                 </p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Student-Faculty Ratio</p>
+                <MissingDataIndicator label="" compact />
               </div>
             )}
           </div>
@@ -205,8 +312,8 @@ export default function InstitutionDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Gallery Section - Only show if images exist */}
-            {!loadingGallery && galleryImages.length > 0 && (
+            {/* Gallery Section */}
+            {!loadingGallery && galleryImages.length > 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Campus Gallery</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -237,50 +344,77 @@ export default function InstitutionDetailPage({
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* Admissions Section - Only show if data exists */}
-            {hasAdmissionsData() && (
+            ) : !loadingGallery ? (
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                  <GraduationCap className="h-6 w-6" />
-                  Admissions
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Campus Gallery</h2>
+                <MissingDataIndicator label="Campus images" />
+              </div>
+            ) : null}
+
+            {/* Admissions Section */}
+            {hasAdmissionsData() ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <GraduationCap className="h-6 w-6" />
+                    Admissions
+                  </h2>
+                  <VerifiedBadge
+                    verified={institution.admissions_data_verified}
+                    verifiedAt={institution.admissions_data_verified_at}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {institution.acceptance_rate && (
+                  {institution.acceptance_rate ? (
                     <div>
                       <p className="text-sm font-medium text-gray-500 mb-1">Acceptance Rate</p>
                       <p className="text-2xl font-bold text-gray-900">
                         {institution.acceptance_rate}%
                       </p>
                     </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">Acceptance Rate</p>
+                      <MissingDataIndicator label="" compact />
+                    </div>
                   )}
 
-                  {(institution.sat_reading_25th || institution.sat_math_25th) && (
+                  {(institution.sat_reading_25th && institution.sat_reading_75th) ||
+                    (institution.sat_math_25th && institution.sat_math_75th) ? (
                     <div className="sm:col-span-2">
                       <p className="text-sm font-medium text-gray-500 mb-3">SAT Score Range (25th-75th percentile)</p>
                       <div className="grid grid-cols-2 gap-4">
-                        {institution.sat_reading_25th && institution.sat_reading_75th && (
+                        {institution.sat_reading_25th && institution.sat_reading_75th ? (
                           <div className="bg-gray-50 rounded-lg p-4">
                             <p className="text-xs text-gray-600 mb-1">Reading</p>
                             <p className="text-lg font-semibold text-gray-900">
                               {institution.sat_reading_25th} - {institution.sat_reading_75th}
                             </p>
                           </div>
+                        ) : (
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-xs text-gray-600 mb-1">Reading</p>
+                            <MissingDataIndicator label="" compact />
+                          </div>
                         )}
-                        {institution.sat_math_25th && institution.sat_math_75th && (
+                        {institution.sat_math_25th && institution.sat_math_75th ? (
                           <div className="bg-gray-50 rounded-lg p-4">
                             <p className="text-xs text-gray-600 mb-1">Math</p>
                             <p className="text-lg font-semibold text-gray-900">
                               {institution.sat_math_25th} - {institution.sat_math_75th}
                             </p>
                           </div>
+                        ) : (
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-xs text-gray-600 mb-1">Math</p>
+                            <MissingDataIndicator label="" compact />
+                          </div>
                         )}
                       </div>
                     </div>
-                  )}
+                  ) : null}
 
-                  {(institution.act_composite_25th || institution.act_composite_75th) && (
+                  {institution.act_composite_25th && institution.act_composite_75th ? (
                     <div className="sm:col-span-2">
                       <p className="text-sm font-medium text-gray-500 mb-2">ACT Composite (25th-75th percentile)</p>
                       <div className="bg-gray-50 rounded-lg p-4">
@@ -289,172 +423,223 @@ export default function InstitutionDetailPage({
                         </p>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <GraduationCap className="h-6 w-6" />
+                  Admissions
+                </h2>
+                <MissingDataIndicator label="Admissions data" />
               </div>
             )}
 
-            {/* Academic Information - Only show if data exists */}
-            {hasAcademicData() && (
+            {/* Academic Information */}
+            {hasAcademicData() ? (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Academic Information</h2>
                 <div className="space-y-4">
-                  {institution.size_category && (
+                  {institution.size_category ? (
                     <div className="flex justify-between items-center py-3 border-b border-gray-200">
                       <span className="text-gray-600">Size Category</span>
                       <span className="font-semibold text-gray-900 capitalize">
-                        {institution.size_category}
+                        {institution.size_category.replace('_', ' ')}
                       </span>
                     </div>
+                  ) : (
+                    <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                      <span className="text-gray-600">Size Category</span>
+                      <MissingDataIndicator label="" compact />
+                    </div>
                   )}
-                  {institution.locale && (
+                  {institution.locale ? (
                     <div className="flex justify-between items-center py-3 border-b border-gray-200">
                       <span className="text-gray-600">Location Type</span>
                       <span className="font-semibold text-gray-900 capitalize">
                         {institution.locale}
                       </span>
                     </div>
+                  ) : (
+                    <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                      <span className="text-gray-600">Location Type</span>
+                      <MissingDataIndicator label="" compact />
+                    </div>
                   )}
-                  {institution.student_faculty_ratio && (
+                  {institution.student_faculty_ratio ? (
                     <div className="flex justify-between items-center py-3">
                       <span className="text-gray-600">Student-Faculty Ratio</span>
                       <span className="font-semibold text-gray-900">
                         {institution.student_faculty_ratio}:1
                       </span>
                     </div>
+                  ) : (
+                    <div className="flex justify-between items-center py-3">
+                      <span className="text-gray-600">Student-Faculty Ratio</span>
+                      <MissingDataIndicator label="" compact />
+                    </div>
                   )}
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Academic Information</h2>
+                <MissingDataIndicator label="Academic data" />
               </div>
             )}
           </div>
 
           {/* Sidebar - Cost Information */}
           <div className="lg:col-span-1">
-            {hasCostData() && (
+            {hasCostData() ? (
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                  <DollarSign className="h-6 w-6" />
-                  Cost Information
-                </h2>
-                <div className="space-y-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <DollarSign className="h-6 w-6" />
+                    Cost Information
+                  </h2>
+                </div>
+                <VerifiedBadge
+                  verified={institution.cost_data_verified}
+                  verifiedAt={institution.cost_data_verified_at}
+                />
+                <div className="space-y-4 mt-4">
                   {/* Tuition */}
-                  {(institution.tuition_in_state || institution.tuition_out_of_state || institution.tuition_private) && (
+                  {(institution.tuition_in_state || institution.tuition_out_of_state || institution.tuition_private) ? (
                     <div className="pb-4 border-b border-gray-200">
                       <p className="text-sm font-medium text-gray-500 mb-3">Tuition</p>
-                      {institution.tuition_in_state && (
+                      {institution.tuition_in_state ? (
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">In-State</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.tuition_in_state)}
                           </span>
                         </div>
-                      )}
-                      {institution.tuition_out_of_state && (
+                      ) : null}
+                      {institution.tuition_out_of_state ? (
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Out-of-State</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.tuition_out_of_state)}
                           </span>
                         </div>
-                      )}
-                      {institution.tuition_private && (
+                      ) : null}
+                      {institution.tuition_private ? (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Tuition</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.tuition_private)}
                           </span>
                         </div>
-                      )}
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="pb-4 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-500 mb-3">Tuition</p>
+                      <MissingDataIndicator label="" compact />
                     </div>
                   )}
 
                   {/* Room & Board */}
-                  {(institution.room_and_board || institution.room_cost || institution.board_cost) && (
+                  {(institution.room_and_board || institution.room_cost || institution.board_cost) ? (
                     <div className="pb-4 border-b border-gray-200">
                       <p className="text-sm font-medium text-gray-500 mb-3">Housing</p>
-                      {institution.room_and_board && (
+                      {institution.room_and_board ? (
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Room & Board</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.room_and_board)}
                           </span>
                         </div>
-                      )}
-                      {institution.room_cost && (
+                      ) : null}
+                      {institution.room_cost ? (
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Room Only</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.room_cost)}
                           </span>
                         </div>
-                      )}
-                      {institution.board_cost && (
+                      ) : null}
+                      {institution.board_cost ? (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Board Only</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.board_cost)}
                           </span>
                         </div>
-                      )}
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="pb-4 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-500 mb-3">Housing</p>
+                      <MissingDataIndicator label="" compact />
                     </div>
                   )}
 
                   {/* Application Fees */}
-                  {(institution.application_fee_undergrad || institution.application_fee_grad) && (
+                  {(institution.application_fee_undergrad || institution.application_fee_grad) ? (
                     <div>
                       <p className="text-sm font-medium text-gray-500 mb-3">Application Fees</p>
-                      {institution.application_fee_undergrad && (
+                      {institution.application_fee_undergrad ? (
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Undergraduate</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.application_fee_undergrad)}
                           </span>
                         </div>
-                      )}
-                      {institution.application_fee_grad && (
+                      ) : null}
+                      {institution.application_fee_grad ? (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Graduate</span>
                           <span className="font-semibold text-gray-900">
                             {formatCurrency(institution.application_fee_grad)}
                           </span>
                         </div>
-                      )}
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-3">Application Fees</p>
+                      <MissingDataIndicator label="" compact />
                     </div>
                   )}
                 </div>
-
-                {/* Data verification badge */}
-                {institution.cost_data_verified && (
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-sm text-green-600">
-                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="font-medium">Verified by Institution</span>
-                    </div>
-                  </div>
-                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <DollarSign className="h-6 w-6" />
+                  Cost Information
+                </h2>
+                <MissingDataIndicator label="Cost information" />
               </div>
             )}
           </div>
         </div>
 
-        {/* Debug Info (Development Only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <details className="mt-8">
-            <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
-              Debug Information
-            </summary>
-            <div className="mt-2 p-4 bg-gray-100 rounded text-xs font-mono space-y-1">
-              <p><strong>Institution ID:</strong> {institution.id}</p>
-              <p><strong>IPEDS ID:</strong> {ipeds_id}</p>
-              <p><strong>Gallery Images Count:</strong> {galleryImages.length}</p>
-              <p><strong>Featured Image Set:</strong> {featuredImage ? 'Yes' : 'No'}</p>
-              <p><strong>Has Cost Data:</strong> {hasCostData() ? 'Yes' : 'No'}</p>
-              <p><strong>Has Admissions Data:</strong> {hasAdmissionsData() ? 'Yes' : 'No'}</p>
-              <p><strong>Has Academic Data:</strong> {hasAcademicData() ? 'Yes' : 'No'}</p>
+        {/* Call to Action for Institution Admins */}
+        {needsImprovement && (
+          <div className="mt-12 bg-gradient-to-r from-primary-600 to-accent-600 rounded-lg shadow-lg p-8 text-white">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+                Represent {institution.name}?
+              </h2>
+              <p className="text-lg mb-6 text-white/90">
+                Help prospective students by keeping your institution's profile up-to-date with accurate costs,
+                admissions data, campus images, and more.
+              </p>
+              <Link href="/admin/login">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="bg-white text-primary-600 hover:bg-gray-100"
+                >
+                  Claim This Profile
+                </Button>
+              </Link>
             </div>
-          </details>
+          </div>
         )}
       </div>
     </div>

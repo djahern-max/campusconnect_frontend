@@ -5,11 +5,11 @@ import type { Institution } from '@/types/api';
 export interface GetInstitutionsParams {
     state?: string;
     limit?: number;
-    offset?: number;
+    page?: number;
 }
 
 export interface SearchInstitutionsParams {
-    query?: string;
+    q?: string;
     state?: string;
     type?: string;
     limit?: number;
@@ -23,11 +23,19 @@ export interface InstitutionStats {
     completeness_percentage: number;
 }
 
+export interface PaginatedInstitutionsResponse {
+    institutions: Institution[];
+    total: number;
+    page: number;
+    limit: number;
+    has_more: boolean;
+}
+
 // PUBLIC ENDPOINTS (no /admin prefix)
 
 // Get list of institutions
-export const getInstitutions = async (params?: GetInstitutionsParams): Promise<Institution[]> => {
-    const response = await apiClient.get<Institution[]>('/institutions', { params });
+export const getInstitutions = async (params?: GetInstitutionsParams): Promise<PaginatedInstitutionsResponse> => {
+    const response = await apiClient.get<PaginatedInstitutionsResponse>('/institutions', { params });
     return response.data;
 };
 

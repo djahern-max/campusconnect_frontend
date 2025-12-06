@@ -48,12 +48,13 @@ export default function InstitutionsPage() {
         const data = await institutionsApi.getInstitutions({
           state: selectedState || undefined,
           limit: ITEMS_PER_PAGE,
-          offset: (currentPage - 1) * ITEMS_PER_PAGE
+          page: currentPage  // ✅ CHANGED: Use 'page' instead of 'offset'
         });
 
-        setInstitutions(data);
-        setTotalCount(data.length);
-        setHasMore(data.length === ITEMS_PER_PAGE);
+        // ✅ CHANGED: Access the paginated response structure
+        setInstitutions(data.institutions);
+        setTotalCount(data.total);
+        setHasMore(data.has_more);
       } catch (err) {
         console.error('Error fetching institutions:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch institutions');
@@ -79,7 +80,7 @@ export default function InstitutionsPage() {
 
       try {
         setIsSearching(true);
-        const results = await institutionsApi.searchInstitutions({ query: searchTerm });
+        const results = await institutionsApi.searchInstitutions({ q: searchTerm });
         setSearchResults(results);
         setShowSearchDropdown(results.length > 0);
       } catch (err) {
