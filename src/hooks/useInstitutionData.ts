@@ -1,6 +1,6 @@
 // src/hooks/useInstitutionData.ts
 import { useState, useEffect, useCallback } from 'react';
-import { getInstitutionComplete, updateInstitution } from '@/api/endpoints/institutions';
+import { getInstitutionComplete, updateBasicInfo, updateCostData, updateAdmissionsData } from '@/api/endpoints/institutions';
 import type { Institution } from '@/types/api';
 
 interface UseInstitutionDataReturn {
@@ -11,6 +11,38 @@ interface UseInstitutionDataReturn {
     refetch: () => Promise<void>;
     saving: boolean;
 }
+
+// Helper to determine which endpoint to use based on field
+const getUpdateEndpoint = (field: keyof Institution) => {
+    // Basic info fields
+    const basicInfoFields = [
+        'name', 'city', 'state', 'zip', 'website', 'type',
+        'control', 'locale', 'size', 'founded'
+    ];
+
+    // Cost/tuition fields
+    const costFields = [
+        'tuition_in_state', 'tuition_out_of_state', 'room_and_board',
+        'books_and_supplies', 'other_expenses', 'total_cost'
+    ];
+
+    // Admissions fields
+    const admissionsFields = [
+        'acceptance_rate', 'sat_reading_25th', 'sat_reading_75th',
+        'sat_math_25th', 'sat_math_75th', 'act_composite_25th',
+        'act_composite_75th', 'application_fee', 'application_deadline'
+    ];
+
+    if (basicInfoFields.includes(field as string)) {
+        return 'basic';
+    } else if (costFields.includes(field as string)) {
+        return 'cost';
+    } else if (admissionsFields.includes(field as string)) {
+        return 'admissions';
+    }
+
+    return 'basic'; // default
+};
 
 /**
  * Custom hook for managing institution data
@@ -58,8 +90,22 @@ export const useInstitutionData = (institutionId: number | null): UseInstitution
             // Optimistic update
             setData(prev => prev ? { ...prev, [field]: value } : null);
 
-            // Make API call
-            const updated = await updateInstitution(institutionId, { [field]: value });
+            // Determine which endpoint to use and make API call
+            const endpoint = getUpdateEndpoint(field);
+            let updated: Institution;
+
+            switch (endpoint) {
+                case 'cost':
+                    updated = await updateCostData(institutionId, { [field]: value });
+                    break;
+                case 'admissions':
+                    updated = await updateAdmissionsData(institutionId, { [field]: value });
+                    break;
+                case 'basic':
+                default:
+                    updated = await updateBasicInfo(institutionId, { [field]: value });
+                    break;
+            }
 
             // Update with server response
             setData(updated);
