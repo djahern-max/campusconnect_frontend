@@ -115,8 +115,8 @@ export default function HomePage() {
           {featuredSlides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-50' : 'opacity-0'
-                }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+
             >
               <Image
                 src={slide.cdn_url || slide.image_url}
@@ -259,7 +259,7 @@ function RestOfPageContent() {
           <Button
             variant="primary"
             size="lg"
-            className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all opacity-90"
+            className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all opacity-60"
           >
             List Your Institution
             <ArrowRight className="ml-2 h-5 w-5" />
