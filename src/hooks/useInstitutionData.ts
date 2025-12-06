@@ -29,6 +29,7 @@ interface QualityMetrics {
     needs_verification: boolean;
     last_verified: string | null;
     verification_status: string;
+    data_last_updated: string;
     ipeds_id?: number;
 }
 
