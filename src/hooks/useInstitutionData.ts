@@ -25,6 +25,7 @@ interface QualityMetrics {
     data_freshness: string;
     data_source: string;
     missing_fields: string[];
+    verified_fields: string[];
     needs_verification: boolean;
     last_verified: string | null;
     verification_status: string;
