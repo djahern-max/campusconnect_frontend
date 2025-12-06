@@ -21,14 +21,6 @@ const US_STATES = [
 
 const ITEMS_PER_PAGE = 24;
 
-interface InstitutionListResponse {
-  institutions: Institution[];
-  total: number;
-  page: number;
-  limit: number;
-  has_more: boolean;
-}
-
 export default function InstitutionsPage() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,15 +45,15 @@ export default function InstitutionsPage() {
         setIsLoading(true);
         setError(null);
 
-        const data: InstitutionListResponse = await institutionsApi.getAll({
-          page: currentPage,
+        const data = await institutionsApi.getInstitutions({
+          state: selectedState || undefined,
           limit: ITEMS_PER_PAGE,
-          ...(selectedState && { state: selectedState })
+          offset: (currentPage - 1) * ITEMS_PER_PAGE
         });
 
-        setInstitutions(data.institutions);
-        setTotalCount(data.total);
-        setHasMore(data.has_more);
+        setInstitutions(data);
+        setTotalCount(data.length);
+        setHasMore(data.length === ITEMS_PER_PAGE);
       } catch (err) {
         console.error('Error fetching institutions:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch institutions');
@@ -87,7 +79,7 @@ export default function InstitutionsPage() {
 
       try {
         setIsSearching(true);
-        const results = await institutionsApi.search(searchTerm);
+        const results = await institutionsApi.searchInstitutions({ query: searchTerm });
         setSearchResults(results);
         setShowSearchDropdown(results.length > 0);
       } catch (err) {
@@ -309,32 +301,6 @@ export default function InstitutionsPage() {
                             {institution.student_faculty_ratio}:1 student-faculty ratio
                           </div>
                         )}
-
-                        {/* <div className="mt-3 flex items-center justify-between">
-                          {institution.control_type && (
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.control_type === 'PUBLIC'
-                                ? 'bg-blue-100 text-blue-800'
-                                : institution.control_type === 'PRIVATE_NONPROFIT'
-                                  ? 'bg-purple-100 text-purple-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {institution.control_type.replace(/_/g, ' ')}
-                            </span>
-                          )}
-
-                          {institution.data_completeness_score !== undefined && (
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${institution.data_completeness_score >= 80
-                                ? 'bg-green-100 text-green-800'
-                                : institution.data_completeness_score >= 60
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : institution.data_completeness_score >= 40
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {institution.data_completeness_score}% Complete
-                            </span>
-                          )}
-                        </div> */}
                       </div>
                     </CardBody>
                   </Card>
