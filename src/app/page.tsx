@@ -259,7 +259,7 @@ function RestOfPageContent() {
           <Button
             variant="primary"
             size="lg"
-            className="bg-gray-900 hover:bg-gray-800 text-white"
+            className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all opacity-90"
           >
             List Your Institution
             <ArrowRight className="ml-2 h-5 w-5" />
