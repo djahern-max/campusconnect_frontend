@@ -165,23 +165,7 @@ export const getInstitutionQuality = async (institution_id: number) => {
     return response.data;
 };
 
-// Update basic info (Regular Admin)
-export const updateBasicInfo = async (institution_id: number, data: any) => {
-    const response = await apiClient.put(`/admin/institution-data/${institution_id}/basic-info`, data);
-    return response.data;
-};
 
-// Update cost data (Regular Admin)
-export const updateCostData = async (institution_id: number, data: any) => {
-    const response = await apiClient.put(`/admin/institution-data/${institution_id}/cost-data`, data);
-    return response.data;
-};
-
-// Update admissions data (Regular Admin)
-export const updateAdmissionsData = async (institution_id: number, data: any) => {
-    const response = await apiClient.put(`/admin/institution-data/${institution_id}/admissions-data`, data);
-    return response.data;
-};
 
 // Verify current data (Regular Admin)
 export const verifyCurrentData = async (institution_id: number) => {
@@ -192,6 +176,11 @@ export const verifyCurrentData = async (institution_id: number) => {
 // Get verification history (Regular Admin)
 export const getVerificationHistory = async (institution_id: number) => {
     const response = await apiClient.get(`/admin/institution-data/${institution_id}/verification-history`);
+    return response.data;
+};
+
+export const updateInstitutionData = async (institution_id: number, data: Partial<Institution>) => {
+    const response = await apiClient.patch(`/admin/institutions/${institution_id}/ipeds-data`, data);
     return response.data;
 };
 
@@ -222,9 +211,6 @@ export const institutionsApi = {
     bulkVerifyInstitutions,
     getInstitutionDataForAdmin,
     getInstitutionQuality,
-    updateBasicInfo,
-    updateCostData,
-    updateAdmissionsData,
     verifyCurrentData,
     getVerificationHistory,
 };

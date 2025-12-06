@@ -42,6 +42,8 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, description, icon, href,
     warning: 'bg-amber-50 text-amber-600 hover:bg-amber-100',
   };
 
+
+
   return (
     <button
       onClick={() => router.push(href)}
@@ -139,6 +141,7 @@ export default function AdminDashboard() {
 
   // Local state for formatted values
   const [formattedValues, setFormattedValues] = useState<Record<string, string>>({});
+  const [fieldTimeouts, setFieldTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
 
   // Update formatted values when data loads
   useEffect(() => {
@@ -166,10 +169,18 @@ export default function AdminDashboard() {
   }, [data]);
 
   const handleFieldChange = (field: string, value: any) => {
+    // Clear existing timeout for this field
+    if (fieldTimeouts[field]) {
+      clearTimeout(fieldTimeouts[field]);
+    }
+
+    // Set new timeout
     const timeoutId = setTimeout(() => {
       updateField(field as any, value);
     }, 500);
-    return () => clearTimeout(timeoutId);
+
+    // Store timeout ID
+    setFieldTimeouts(prev => ({ ...prev, [field]: timeoutId }));
   };
 
   // Handle number input with formatting
