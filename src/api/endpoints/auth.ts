@@ -1,5 +1,5 @@
 import apiClient from '../client';
-import type { LoginResponse, AdminUser } from '@/types/api';
+import type { Token, AdminUser } from '@/types';
 
 export const authApi = {
   login: async (email: string, password: string) => {
@@ -7,7 +7,7 @@ export const authApi = {
     formData.append('username', email);
     formData.append('password', password);
 
-    const response = await apiClient.post<LoginResponse>('/admin/auth/login', formData, {
+    const response = await apiClient.post<Token>('/admin/auth/login', formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
     return response.data;
@@ -16,10 +16,10 @@ export const authApi = {
   validateInvitation: async (code: string) => {
     const response = await apiClient.post<{
       valid: boolean;
-      entity_type?: string;
-      entity_id?: number;
-      entity_name?: string;
-      message?: string;
+      entity_type?: string | null;
+      entity_id?: number | null;
+      entity_name?: string | null;
+      message: string;
     }>('/admin/auth/validate-invitation', { code });
     return response.data;
   },
