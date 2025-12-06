@@ -1,56 +1,102 @@
 // src/api/endpoints/institutions.ts
-import apiClient from '../client';
-import type { Institution, AdmissionData, TuitionData, FinancialOverview } from '@/types/api';
+import { apiClient } from '../client';
+import type { Institution } from '@/types/api';
 
-interface InstitutionListResponse {
-  institutions: Institution[];
-  total: number;
-  page: number;
-  limit: number;
-  has_more: boolean;
-}
+/**
+ * Institution API endpoints
+ */
 
-export const institutionsApi = {
-  getAll: async (params?: { state?: string; page?: number; limit?: number }): Promise<InstitutionListResponse> => {
-    const response = await apiClient.get<InstitutionListResponse>('/institutions', { params });
-    return response.data;
-  },
+// Get all institutions (paginated)
+export const getInstitutions = async (params?: {
+  state?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  const response = await apiClient.get('/institutions', { params });
+  return response.data;
+};
 
-  // NEW: Add search endpoint
-  search: async (query: string): Promise<Institution[]> => {
-    const response = await apiClient.get<Institution[]>(`/institutions/search`, {
-      params: { q: query }
-    });
-    return response.data;
-  },
+// Get single institution by IPEDS ID
+export const getInstitution = async (ipeds_id: number) => {
+  const response = await apiClient.get(`/institutions/${ipeds_id}`);
+  return response.data;
+};
 
-  getById: async (ipeds_id: number): Promise<Institution> => {
-    const response = await apiClient.get<Institution>(`/institutions/${ipeds_id}`);
-    return response.data;
-  },
+// Get single institution by database ID
+export const getInstitutionById = async (id: number) => {
+  const response = await apiClient.get(`/institutions/by-id/${id}`);
+  return response.data;
+};
 
-  getAdmissions: async (ipeds_id: number, academic_year?: string): Promise<AdmissionData[]> => {
-    const params = academic_year ? { academic_year } : {};
-    const response = await apiClient.get<AdmissionData[]>(
-      `/institutions/${ipeds_id}/admissions`,
-      { params }
-    );
-    return response.data;
-  },
+// ============================================================================
+// NEW: Get complete institution data (all fields)
+// ============================================================================
+export const getInstitutionComplete = async (id: number): Promise<Institution> => {
+  const response = await apiClient.get(`/institutions/complete/${id}`);
+  return response.data;
+};
 
-  getTuition: async (ipeds_id: number, academic_year?: string): Promise<TuitionData[]> => {
-    const params = academic_year ? { academic_year } : {};
-    const response = await apiClient.get<TuitionData[]>(
-      `/institutions/${ipeds_id}/tuition`,
-      { params }
-    );
-    return response.data;
-  },
+// ============================================================================
+// NEW: Update institution data (partial update)
+// ============================================================================
+export const updateInstitution = async (
+  id: number,
+  data: Partial<Institution>
+): Promise<Institution> => {
+  const response = await apiClient.patch(`/admin/institutions/${id}`, data);
+  return response.data;
+};
 
-  getFinancialOverview: async (ipeds_id: number): Promise<FinancialOverview> => {
-    const response = await apiClient.get<FinancialOverview>(
-      `/institutions/${ipeds_id}/financial-overview`
-    );
-    return response.data;
-  },
+// Search institutions
+export const searchInstitutions = async (query: string) => {
+  const response = await apiClient.get('/institutions/search', {
+    params: { q: query },
+  });
+  return response.data;
+};
+
+// Get featured institutions
+export const getFeaturedInstitutions = async (limit: number = 10) => {
+  const response = await apiClient.get('/institutions/featured/list', {
+    params: { limit },
+  });
+  return response.data;
+};
+
+// Advanced filtered search
+export const getFilteredInstitutions = async (filters: {
+  query_text?: string;
+  state?: string;
+  min_completeness?: number;
+  data_source?: string;
+  level?: number;
+  is_featured?: boolean;
+  has_cost_data?: boolean;
+  max_tuition?: number;
+  has_admissions_data?: boolean;
+  max_acceptance_rate?: number;
+  limit?: number;
+  offset?: number;
+}) => {
+  const response = await apiClient.get('/institutions/search/filtered', {
+    params: filters,
+  });
+  return response.data;
+};
+
+// Get state summary
+export const getStateSummary = async (
+  state: string,
+  min_completeness: number = 60
+) => {
+  const response = await apiClient.get(`/institutions/by-state/${state}/summary`, {
+    params: { min_completeness },
+  });
+  return response.data;
+};
+
+// Get completeness statistics
+export const getCompletenessStats = async () => {
+  const response = await apiClient.get('/institutions/stats/completeness');
+  return response.data;
 };

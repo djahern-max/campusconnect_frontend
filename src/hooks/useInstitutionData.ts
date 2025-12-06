@@ -1,14 +1,29 @@
 // src/hooks/useInstitutionData.ts
-import { useState, useEffect } from 'react';
-import { institutionDataApi, InstitutionDataQuality } from '@/api/endpoints/institutionDataAPI';
+import { useState, useEffect, useCallback } from 'react';
+import { getInstitutionComplete, updateInstitution } from '@/api/endpoints/institutions';
+import type { Institution } from '@/types/api';
 
-export function useInstitutionDataQuality(institutionId: number | null) {
-    const [quality, setQuality] = useState<InstitutionDataQuality | null>(null);
+interface UseInstitutionDataReturn {
+    data: Institution | null;
+    loading: boolean;
+    error: string | null;
+    updateField: (field: keyof Institution, value: any) => Promise<void>;
+    refetch: () => Promise<void>;
+    saving: boolean;
+}
+
+/**
+ * Custom hook for managing institution data
+ * Handles loading, updating, and auto-saving institution fields
+ */
+export const useInstitutionData = (institutionId: number | null): UseInstitutionDataReturn => {
+    const [data, setData] = useState<Institution | null>(null);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchQuality = async () => {
-        // Still check if institutionId exists to know if user is an institution admin
+    // Fetch institution data
+    const fetchData = useCallback(async () => {
         if (!institutionId) {
             setLoading(false);
             return;
@@ -17,25 +32,59 @@ export function useInstitutionDataQuality(institutionId: number | null) {
         try {
             setLoading(true);
             setError(null);
-            // ✅ Remove institutionId parameter - backend gets it from auth token
-            const data = await institutionDataApi.getDataQuality(institutionId);
-            setQuality(data);
+            const institution = await getInstitutionComplete(institutionId);
+            setData(institution);
         } catch (err: any) {
-            console.error('Error fetching data quality:', err);
-            setError(err.response?.data?.detail || 'Failed to load data quality');
+            console.error('Error fetching institution data:', err);
+            setError(err.response?.data?.detail || 'Failed to load institution data');
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchQuality();
     }, [institutionId]);
 
+    // Initial data load
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    // Update a single field
+    const updateField = useCallback(async (field: keyof Institution, value: any) => {
+        if (!institutionId) return;
+
+        try {
+            setSaving(true);
+            setError(null);
+
+            // Optimistic update
+            setData(prev => prev ? { ...prev, [field]: value } : null);
+
+            // Make API call
+            const updated = await updateInstitution(institutionId, { [field]: value });
+
+            // Update with server response
+            setData(updated);
+        } catch (err: any) {
+            console.error('Error updating institution:', err);
+            setError(err.response?.data?.detail || 'Failed to save changes');
+
+            // Revert optimistic update on error
+            await fetchData();
+        } finally {
+            setSaving(false);
+        }
+    }, [institutionId, fetchData]);
+
+    // Manual refetch
+    const refetch = useCallback(async () => {
+        await fetchData();
+    }, [fetchData]);
+
     return {
-        quality,
+        data,
         loading,
         error,
-        refetch: fetchQuality,
+        updateField,
+        refetch,
+        saving,
     };
-}
+};
