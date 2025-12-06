@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/api/client';
-import { calculateTrialStatus } from '@/utils/trialCalculations';
 import { CreditCard, Calendar, XCircle, ExternalLink, CheckCircle } from 'lucide-react';
 
 interface PricingInfo {
@@ -33,10 +32,6 @@ export default function SubscriptionPage() {
     const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
     const [loadingPrice, setLoadingPrice] = useState(true);
     const [loadingSubscription, setLoadingSubscription] = useState(true);
-
-    const trialStatus = user?.created_at
-        ? calculateTrialStatus(user.created_at)
-        : null;
 
     // Fetch subscription status and pricing
     useEffect(() => {
@@ -305,107 +300,56 @@ export default function SubscriptionPage() {
                     </div>
                 ) : (
                     /* NEW SUBSCRIPTION VIEW (Original pricing card) */
-                    <>
-                        {/* Trial Status Banner */}
-                        {trialStatus && !trialStatus.hasExpired && (
-                            <div className="mb-8 p-6 rounded-lg bg-blue-50 border-2 border-blue-200">
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0">
-                                        <span className="text-3xl">ℹ️</span>
-                                    </div>
-                                    <div className="ml-4">
-                                        <h3 className="text-lg font-semibold text-blue-900 mb-1">
-                                            You Have {trialStatus.daysRemaining} Day{trialStatus.daysRemaining !== 1 ? 's' : ''} Remaining in Your Trial
-                                        </h3>
-                                        <p className="text-blue-700">
-                                            Your trial ends on {trialStatus.trialEndDate.toLocaleDateString('en-US', {
-                                                month: 'long',
-                                                day: 'numeric',
-                                                year: 'numeric'
-                                            })}. Subscribe now to ensure uninterrupted access.
-                                        </p>
-                                    </div>
-                                </div>
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                        <div className={`${isScholarship ? 'bg-gradient-to-r from-green-600 to-green-700' : 'bg-gradient-to-r from-blue-600 to-blue-700'} px-8 py-6`}>
+                            <h2 className="text-2xl font-bold text-white mb-2">
+                                Premium Plan for {entityTypeDisplay}s
+                            </h2>
+                            <div className="flex items-baseline text-white">
+                                <span className="text-5xl font-extrabold">{priceDisplay}</span>
+                                <span className="text-xl ml-2">/month</span>
                             </div>
-                        )}
-
-                        {trialStatus?.hasExpired && (
-                            <div className="mb-8 p-6 rounded-lg bg-red-50 border-2 border-red-200">
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0">
-                                        <span className="text-3xl">⚠️</span>
-                                    </div>
-                                    <div className="ml-4">
-                                        <h3 className="text-lg font-semibold text-red-900 mb-1">
-                                            Your Trial Has Expired
-                                        </h3>
-                                        <p className="text-red-700">
-                                            Subscribe now to continue accessing your dashboard and all premium features.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Pricing Card */}
-                        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                            <div className={`${isScholarship ? 'bg-gradient-to-r from-green-600 to-green-700' : 'bg-gradient-to-r from-blue-600 to-blue-700'} px-8 py-6`}>
-                                <h2 className="text-2xl font-bold text-white mb-2">
-                                    Premium Plan for {entityTypeDisplay}s
-                                </h2>
-                                <div className="flex items-baseline text-white">
-                                    <span className="text-5xl font-extrabold">{priceDisplay}</span>
-                                    <span className="text-xl ml-2">/month</span>
-                                </div>
-                                {isScholarship && (
-                                    <p className="text-green-100 text-sm mt-2">
-                                        Special pricing for scholarship providers
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="px-8 py-10">
-                                <div className="space-y-4 mb-8">
-                                    <Feature text="Full dashboard access" />
-                                    <Feature text="Unlimited gallery images" />
-                                    <Feature text="Unlimited video uploads" />
-                                    <Feature text="Custom branding options" />
-                                    <Feature text="Advanced analytics" />
-                                    <Feature text="Priority support" />
-                                    <Feature text="No advertisements" />
-                                    <Feature text="Monthly feature updates" />
-                                </div>
-
-                                <button
-                                    onClick={handleCheckout}
-                                    disabled={isLoading}
-                                    className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${isLoading ? 'bg-gray-400 cursor-not-allowed' : `${buttonColor} shadow-lg hover:shadow-xl`
-                                        } text-white`}
-                                >
-                                    {isLoading ? (
-                                        <span className="flex items-center justify-center">
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Processing...
-                                        </span>
-                                    ) : (
-                                        'Subscribe Now'
-                                    )}
-                                </button>
-
-                                {!trialStatus?.hasExpired && trialStatus && (
-                                    <p className="text-center text-gray-600 text-sm mt-4">
-                                        You'll only be charged after your trial ends on{' '}
-                                        {trialStatus.trialEndDate.toLocaleDateString()}
-                                    </p>
-                                )}
-
-                                <p className="text-center text-gray-500 text-xs mt-6">
-                                    Cancel anytime. No long-term contracts.
+                            {isScholarship && (
+                                <p className="text-green-100 text-sm mt-2">
+                                    Special pricing for scholarship providers
                                 </p>
+                            )}
+                        </div>
+
+                        <div className="px-8 py-10">
+                            <div className="space-y-4 mb-8">
+                                <Feature text="Full dashboard access" />
+                                <Feature text="Unlimited gallery images" />
+                                <Feature text="Unlimited video uploads" />
+                                <Feature text="Custom branding options" />
+                                <Feature text="Advanced analytics" />
+                                <Feature text="Priority support" />
+                                <Feature text="No advertisements" />
+                                <Feature text="Monthly feature updates" />
                             </div>
+
+                            <button
+                                onClick={handleCheckout}
+                                disabled={isLoading}
+                                className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${isLoading ? 'bg-gray-400 cursor-not-allowed' : `${buttonColor} shadow-lg hover:shadow-xl`
+                                    } text-white`}
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </span>
+                                ) : (
+                                    'Subscribe Now'
+                                )}
+                            </button>
+
+                            <p className="text-center text-gray-500 text-xs mt-6">
+                                Cancel anytime. No long-term contracts.
+                            </p>
                         </div>
 
                         {/* FAQ Section */}
@@ -438,7 +382,7 @@ export default function SubscriptionPage() {
                                 )}
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
         </div>
