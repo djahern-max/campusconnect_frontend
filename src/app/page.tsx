@@ -245,27 +245,34 @@ export default function HomePage() {
       <RestOfPageContent />
     </div>
   );
-}
+  function RestOfPageContent() {
+    return (
+      <section className="py-24 text-center relative overflow-hidden">
+        {/* Background image with overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1200)',
+          }}
+        />
+        <div className="absolute inset-0 bg-black/60" />
 
-function RestOfPageContent() {
-  return (
-    <section className="py-24 bg-white text-center">
-      <div className="max-w-4xl mx-auto px-4">
-        <p className="text-2xl text-gray-500 mb-6">
-          Represent a college or scholarship?
-        </p>
-
-        <Link href="/contact">
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all opacity-60"
-          >
-            List Your Institution
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </Link>
-      </div>
-    </section>
-  );
+        <div className="max-w-4xl mx-auto px-4 relative z-10">
+          <p className="text-2xl text-white mb-6 font-semibold">
+            Represent a college or scholarship?
+          </p>
+          <Link href="/contact">
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all"
+            >
+              List Your Institution
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+    );
+  }
 }
