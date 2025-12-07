@@ -12,18 +12,6 @@ const scholarshipImages = [
         url: 'https://magicscholar-images.nyc3.cdn.digitaloceanspaces.com/scholarships/us_presidential_scholars_program.webp',
         alt: 'US Presidential Scholars Program',
     },
-    {
-        url: 'https://magicscholar-images.nyc3.cdn.digitaloceanspaces.com/scholarships/pell_grant.jpg',
-        alt: 'Pell Grant',
-    },
-    {
-        url: 'https://magicscholar-images.nyc3.cdn.digitaloceanspaces.com/scholarships/sallie_mae_fund_scholarship.jpg',
-        alt: 'Sallie Mae Fund Scholarship',
-    },
-    {
-        url: 'https://magicscholar-images.nyc3.cdn.digitaloceanspaces.com/scholarships/national_honors_society.png',
-        alt: '',
-    },
 
 ];
 
