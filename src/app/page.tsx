@@ -1,4 +1,4 @@
-//src/app/page.tsx
+// src/app/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -9,11 +9,12 @@ import {
   DollarSign,
   ArrowRight,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 import Image from 'next/image';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
+import { RotatingInstitutionCta } from '@/components/RotatingInstitutionCta';
 
 // Featured image with entity info
 interface FeaturedSlide {
@@ -60,6 +61,7 @@ export default function HomePage() {
     };
 
     fetchFeaturedImages();
+
     return () => {
       isMounted = false;
     };
@@ -86,19 +88,22 @@ export default function HomePage() {
     setIsAutoPlaying(false);
   };
 
-  // Loading state
+  // Loading state – show a dark hero skeleton + CTA
   if (isLoading) {
     return (
-      <section className="relative min-h-[650px] bg-gray-900" />
+      <>
+        <section className="relative min-h-[650px] bg-gray-900" />
+        <RotatingInstitutionCta />
+      </>
     );
   }
 
-  // Empty state
+  // Empty state – no images, but still show CTA
   if (featuredSlides.length === 0) {
     return (
       <>
         <section className="relative min-h-[650px] bg-gray-900" />
-        <RestOfPageContent />
+        <RotatingInstitutionCta />
       </>
     );
   }
@@ -109,14 +114,13 @@ export default function HomePage() {
     <div>
       {/* Hero Section */}
       <section className="relative min-h-[650px] bg-gray-900 overflow-hidden flex items-center">
-
         {/* Carousel Images */}
         <div className="absolute inset-0">
           {featuredSlides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
-
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+                }`}
             >
               <Image
                 src={slide.cdn_url || slide.image_url}
@@ -136,10 +140,8 @@ export default function HomePage() {
         {/* Content Overlay */}
         <div className="relative z-10 w-full">
           <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 mx-auto text-left">
-
             {activeSlide && (
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
-
                 {/* HERO TITLE */}
                 <Link
                   href={
@@ -151,27 +153,26 @@ export default function HomePage() {
                 >
                   <h1
                     className="
-    text-white/70
-    italic
-    text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
-    font-bold
-    leading-tight
-    drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
-    transition-colors
-    group-hover:text-white
-  "
+                      text-white/70
+                      italic
+                      text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+                      font-bold
+                      leading-tight
+                      drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
+                      transition-colors
+                      group-hover:text-white
+                    "
                   >
                     {activeSlide.entity_name}
                     <ArrowRight
                       className="
-      inline-block ml-3
-      h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12
-      opacity-0 group-hover:opacity-100 group-hover:translate-x-2
-      transition-all
-    "
+                        inline-block ml-3
+                        h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12
+                        opacity-0 group-hover:opacity-100 group-hover:translate-x-2
+                        transition-all
+                      "
                     />
                   </h1>
-
                 </Link>
 
                 {/* LOCATION */}
@@ -191,7 +192,6 @@ export default function HomePage() {
                 {/* CTA BUTTONS */}
                 <div className="pt-3 sm:pt-4">
                   <div className="flex flex-col sm:flex-row gap-3">
-
                     <Link href="/institutions">
                       <Button
                         variant="primary"
@@ -213,12 +213,10 @@ export default function HomePage() {
                         Find Scholarships
                       </Button>
                     </Link>
-
                   </div>
                 </div>
               </div>
             )}
-
           </div>
         </div>
 
@@ -242,41 +240,8 @@ export default function HomePage() {
         )}
       </section>
 
-      <RestOfPageContent />
+      {/* Rotating CTA section – no extra wrapper */}
+      <RotatingInstitutionCta />
     </div>
   );
-  function RestOfPageContent() {
-    return (
-      <section className="py-24 text-center relative overflow-hidden">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=2000&q=80)', // swap URL here
-          }}
-        />
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/60" />
-
-        <div className="max-w-4xl mx-auto px-4 relative z-10">
-          <p className="text-2xl text-white mb-6 font-semibold">
-            Represent a college or scholarship?
-          </p>
-
-          <Link href="/contact">
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all"
-            >
-              List Your Institution
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-    );
-  }
 }
