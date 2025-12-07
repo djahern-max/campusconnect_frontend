@@ -359,7 +359,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
                       <input
                         type="url"
-                        defaultValue={data.website || ''}
+                        value={data.website || ''}
                         onChange={(e) => handleFieldChange('website', e.target.value || null)}
                         placeholder="https://www.example.edu"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
                       <select
-                        defaultValue={data.level?.toString() || ''}
+                        value={data.level?.toString() || ''}
                         onChange={(e) => handleFieldChange('level', e.target.value ? parseInt(e.target.value) : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
@@ -388,7 +388,7 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Control</label>
                       <select
-                        defaultValue={data.control?.toString() || ''}
+                        value={data.control?.toString() || ''}
                         onChange={(e) => handleFieldChange('control', e.target.value ? parseInt(e.target.value) : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
@@ -401,7 +401,7 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Size Category</label>
                       <select
-                        defaultValue={data.size_category || ''}
+                        value={data.size_category || ''}
                         onChange={(e) => handleFieldChange('size_category', e.target.value || null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Locale</label>
                       <select
-                        defaultValue={data.locale || ''}
+                        value={data.locale || ''}
                         onChange={(e) => handleFieldChange('locale', e.target.value || null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
@@ -433,7 +433,7 @@ export default function AdminDashboard() {
                       <input
                         type="number"
                         step="0.01"
-                        defaultValue={data.student_faculty_ratio || ''}
+                        value={data.student_faculty_ratio || ''}
                         onChange={(e) => handleFieldChange('student_faculty_ratio', e.target.value ? parseFloat(e.target.value) : null)}
                         placeholder="15.00"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -596,7 +596,7 @@ export default function AdminDashboard() {
                         <input
                           type="number"
                           step="0.01"
-                          defaultValue={data.acceptance_rate || ''}
+                          value={data.acceptance_rate || ''}
                           onChange={(e) => handleFieldChange('acceptance_rate', e.target.value ? parseFloat(e.target.value) : null)}
                           placeholder="0.00"
                           className="w-full pr-7 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -608,7 +608,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (25th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.sat_reading_25th || ''}
+                        value={data.sat_reading_25th || ''}
                         onChange={(e) => handleFieldChange('sat_reading_25th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -618,7 +618,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (75th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.sat_reading_75th || ''}
+                        value={data.sat_reading_75th || ''}
                         onChange={(e) => handleFieldChange('sat_reading_75th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -628,7 +628,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (25th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.sat_math_25th || ''}
+                        value={data.sat_math_25th || ''}
                         onChange={(e) => handleFieldChange('sat_math_25th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -638,7 +638,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (75th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.sat_math_75th || ''}
+                        value={data.sat_math_75th || ''}
                         onChange={(e) => handleFieldChange('sat_math_75th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -648,7 +648,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (25th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.act_composite_25th || ''}
+                        value={data.act_composite_25th || ''}
                         onChange={(e) => handleFieldChange('act_composite_25th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="1-36"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -658,7 +658,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (75th Percentile)</label>
                       <input
                         type="number"
-                        defaultValue={data.act_composite_75th || ''}
+                        value={data.act_composite_75th || ''}
                         onChange={(e) => handleFieldChange('act_composite_75th', e.target.value ? parseInt(e.target.value) : null)}
                         placeholder="1-36"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
