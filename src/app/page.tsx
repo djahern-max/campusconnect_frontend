@@ -245,7 +245,6 @@ export default function HomePage() {
       <RestOfPageContent />
     </div>
   );
-
   function RestOfPageContent() {
     return (
       <section
@@ -254,7 +253,7 @@ export default function HomePage() {
         py-24 text-center overflow-hidden
         rounded-t-[32px]
         border-t-[6px] border-b-[6px]
-        border-gray-300/70
+        border-white/70        /* << LIGHTEST CLEAN BORDER */
         shadow-[0_-18px_40px_rgba(0,0,0,0.85)]
       "
       >
@@ -292,6 +291,8 @@ export default function HomePage() {
       </section>
     );
   }
+
+
 
 
 
