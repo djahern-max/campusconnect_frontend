@@ -248,19 +248,23 @@ export default function HomePage() {
   function RestOfPageContent() {
     return (
       <section className="py-24 text-center relative overflow-hidden">
-        {/* Background image with overlay */}
+        {/* Background image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1200)',
+            backgroundImage:
+              'url(https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=2000&q=80)', // swap URL here
           }}
         />
+
+        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/60" />
 
         <div className="max-w-4xl mx-auto px-4 relative z-10">
           <p className="text-2xl text-white mb-6 font-semibold">
             Represent a college or scholarship?
           </p>
+
           <Link href="/contact">
             <Button
               variant="primary"
