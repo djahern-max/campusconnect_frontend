@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, X, Loader2 } from 'lucide-react';
 import scholarshipsApi from '@/api/endpoints/scholarships';
-import ScholarshipCard from '@/components/public/ScholarshipCard';
 import { Scholarship } from '@/types';
 import { Button } from '@/components/ui/Button';
 
@@ -220,8 +219,8 @@ export default function ScholarshipsPage() {
                       setCurrentPage(1); // Reset to page 1 when filter changes
                     }}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedType === type
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     {formatType(type)}
@@ -270,16 +269,6 @@ export default function ScholarshipsPage() {
                   {searchTerm && ` matching "${searchTerm}"`}
                 </div>
 
-                {/* Scholarship Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayedScholarships.map(scholarship => (
-                    <ScholarshipCard
-                      key={scholarship.id}
-                      scholarship={scholarship}
-                      onClick={() => handleScholarshipClick(scholarship.id)}
-                    />
-                  ))}
-                </div>
 
                 {/* Load More Button */}
                 {canLoadMore && (
