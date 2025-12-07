@@ -118,23 +118,6 @@ export default function InstitutionDetailPage({
     );
   };
 
-  // Component for verified data badge
-  const VerifiedBadge = ({ verified, verifiedAt }: { verified: boolean; verifiedAt?: string | null }) => {
-    if (!verified) return null;
-    return (
-      <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
-        <CheckCircle className="h-4 w-4 text-green-600" />
-        <span className="text-xs font-medium text-green-700">
-          Verified by Institution
-          {verifiedAt && (
-            <span className="ml-1 text-green-600">
-              · {new Date(verifiedAt).toLocaleDateString()}
-            </span>
-          )}
-        </span>
-      </div>
-    );
-  };
 
   // Helper function to check if cost data exists
   const hasCostData = () => {
@@ -359,10 +342,7 @@ export default function InstitutionDetailPage({
                     <GraduationCap className="h-6 w-6" />
                     Admissions
                   </h2>
-                  <VerifiedBadge
-                    verified={institution.admissions_data_verified}
-                    verifiedAt={institution.admissions_data_verified_at}
-                  />
+
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {institution.acceptance_rate ? (
@@ -500,10 +480,7 @@ export default function InstitutionDetailPage({
                     Cost Information
                   </h2>
                 </div>
-                <VerifiedBadge
-                  verified={institution.cost_data_verified}
-                  verifiedAt={institution.cost_data_verified_at}
-                />
+
                 <div className="space-y-4 mt-4">
                   {/* Tuition */}
                   {(institution.tuition_in_state || institution.tuition_out_of_state || institution.tuition_private) ? (
