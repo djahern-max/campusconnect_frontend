@@ -98,7 +98,7 @@ export default function ContactPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Get Your Institution on CampusConnect
+            Get Your Institution on TheCollegeDirectory.com
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Join hundreds of institutions showcasing their programs to prospective students.
@@ -238,7 +238,8 @@ export default function ContactPage() {
 
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p className="text-sm text-gray-700">
-                  <strong>Pricing:</strong> $39.99/month with a 30-day free trial
+                  <strong>Pricing:</strong> $39.99/month with a 1 YEAR FREE TRIAL!!
+                  That's right - you pay nothing for an entire year, then just $39.99/month after that.  We need your help buildign the most comprehinsive college directory on the web!  Our mission is to help students pay for college and realize their true potential.  Join us!
                 </p>
                 <p className="text-xs text-gray-600 mt-2">
                   Cancel anytime. No long-term contracts required.
