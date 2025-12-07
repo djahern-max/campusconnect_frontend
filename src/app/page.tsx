@@ -245,20 +245,33 @@ export default function HomePage() {
       <RestOfPageContent />
     </div>
   );
+
   function RestOfPageContent() {
     return (
-      <section className="py-24 text-center relative overflow-hidden">
+      <section
+        className="
+        relative -mt-10
+        py-24 text-center overflow-hidden
+        rounded-t-[32px]
+        border-t-[6px] border-b-[6px]
+        border-gray-300/70
+        shadow-[0_-18px_40px_rgba(0,0,0,0.85)]
+      "
+      >
         {/* Background image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              'url(https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=2000&q=80)', // swap URL here
+              'url(https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=2000&q=80)',
           }}
         />
 
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/60" />
+
+        {/* Top fade only */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black via-black/40 to-transparent" />
 
         <div className="max-w-4xl mx-auto px-4 relative z-10">
           <p className="text-2xl text-white mb-6 font-semibold">
@@ -279,4 +292,8 @@ export default function HomePage() {
       </section>
     );
   }
+
+
+
+
 }
