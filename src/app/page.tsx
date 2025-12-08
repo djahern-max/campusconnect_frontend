@@ -207,19 +207,32 @@ export default function HomePage() {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-4 rounded-full transition-all"
+              className="
+        hidden md:flex
+        absolute left-4 top-1/2 -translate-y-1/2
+        items-center justify-center
+        bg-black/60 hover:bg-black/80
+        text-white p-4 rounded-full transition-all
+      "
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
 
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-4 rounded-full transition-all"
+              className="
+        hidden md:flex
+        absolute right-4 top-1/2 -translate-y-1/2
+        items-center justify-center
+        bg-black/60 hover:bg-black/80
+        text-white p-4 rounded-full transition-all
+      "
             >
               <ChevronRight className="h-6 w-6" />
             </button>
           </>
         )}
+
       </section>
     </main>
   );
