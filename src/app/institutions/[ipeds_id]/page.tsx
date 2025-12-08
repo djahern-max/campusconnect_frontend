@@ -502,14 +502,7 @@ export default function InstitutionDetailPage({
                           </span>
                         </div>
                       ) : null}
-                      {institution.tuition_private ? (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Tuition</span>
-                          <span className="font-semibold text-gray-900">
-                            {formatCurrency(institution.tuition_private)}
-                          </span>
-                        </div>
-                      ) : null}
+
                     </div>
                   ) : (
                     <div className="pb-4 border-b border-gray-200">
