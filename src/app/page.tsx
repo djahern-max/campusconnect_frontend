@@ -1,4 +1,4 @@
-//src/app/page.tsx
+// src/app/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +15,6 @@ import Image from 'next/image';
 import axios from 'axios';
 import { API_URL } from '@/config/api';
 
-// Featured image with entity info
 interface FeaturedSlide {
   id: number;
   image_url: string;
@@ -26,7 +25,7 @@ interface FeaturedSlide {
   entity_name: string;
   entity_city: string | null;
   entity_state: string | null;
-  entity_ipeds_id?: number; // For institutions only
+  entity_ipeds_id?: number;
 }
 
 export default function HomePage() {
@@ -35,7 +34,6 @@ export default function HomePage() {
   const [featuredSlides, setFeaturedSlides] = useState<FeaturedSlide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch featured images
   useEffect(() => {
     let isMounted = true;
 
@@ -65,7 +63,6 @@ export default function HomePage() {
     };
   }, []);
 
-  // Auto-advance carousel
   useEffect(() => {
     if (!isAutoPlaying || featuredSlides.length <= 1) return;
 
@@ -86,37 +83,33 @@ export default function HomePage() {
     setIsAutoPlaying(false);
   };
 
-  // Loading state
+  // Loading state: full-height dark hero so no white gap
   if (isLoading) {
     return (
-      <section className="relative min-h-[650px] bg-gray-900" />
+      <section className="relative min-h-[calc(100vh-64px)] bg-gray-900" />
     );
   }
 
-  // Empty state
+  // Empty state: same idea
   if (featuredSlides.length === 0) {
     return (
-      <>
-        <section className="relative min-h-[650px] bg-gray-900" />
-        <RestOfPageContent />
-      </>
+      <section className="relative min-h-[calc(100vh-64px)] bg-gray-900" />
     );
   }
 
   const activeSlide = featuredSlides[currentSlide];
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative min-h-[650px] bg-gray-900 overflow-hidden flex items-center">
-
+    <main>
+      {/* Hero Section fills viewport down to footer */}
+      <section className="relative min-h-[calc(100vh-64px)] bg-gray-900 overflow-hidden flex items-center">
         {/* Carousel Images */}
         <div className="absolute inset-0">
           {featuredSlides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
-
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+                }`}
             >
               <Image
                 src={slide.cdn_url || slide.image_url}
@@ -127,7 +120,6 @@ export default function HomePage() {
                 quality={95}
                 sizes="100vw"
               />
-              {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
             </div>
           ))}
@@ -136,11 +128,8 @@ export default function HomePage() {
         {/* Content Overlay */}
         <div className="relative z-10 w-full">
           <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 mx-auto text-left">
-
             {activeSlide && (
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
-
-                {/* HERO TITLE */}
                 <Link
                   href={
                     activeSlide.entity_type === 'institution'
@@ -151,47 +140,40 @@ export default function HomePage() {
                 >
                   <h1
                     className="
-    text-white/70
-    italic
-    text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
-    font-bold
-    leading-tight
-    drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
-    transition-colors
-    group-hover:text-white
-  "
+                      text-white/70 italic
+                      text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+                      font-bold leading-tight
+                      drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]
+                      transition-colors
+                      group-hover:text-white
+                    "
                   >
                     {activeSlide.entity_name}
                     <ArrowRight
                       className="
-      inline-block ml-3
-      h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12
-      opacity-0 group-hover:opacity-100 group-hover:translate-x-2
-      transition-all
-    "
+                        inline-block ml-3
+                        h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 lg:h-12 lg:w-12
+                        opacity-0 group-hover:opacity-100 group-hover:translate-x-2
+                        transition-all
+                      "
                     />
                   </h1>
-
                 </Link>
 
-                {/* LOCATION */}
                 {activeSlide.entity_city && activeSlide.entity_state && (
                   <p className="text-white/60 text-xl sm:text-2xl md:text-3xl lg:text-4xl">
                     {activeSlide.entity_city}, {activeSlide.entity_state}
                   </p>
                 )}
 
-                {/* CAPTION */}
                 {activeSlide.caption && (
                   <p className="text-white/55 text-lg sm:text-xl md:text-2xl italic max-w-4xl">
                     "{activeSlide.caption}"
                   </p>
                 )}
 
-                {/* CTA BUTTONS */}
                 <div className="pt-3 sm:pt-4">
                   <div className="flex flex-col sm:flex-row gap-3">
-
                     <Link href="/institutions">
                       <Button
                         variant="primary"
@@ -213,12 +195,10 @@ export default function HomePage() {
                         Find Scholarships
                       </Button>
                     </Link>
-
                   </div>
                 </div>
               </div>
             )}
-
           </div>
         </div>
 
@@ -241,53 +221,6 @@ export default function HomePage() {
           </>
         )}
       </section>
-
-    </div>
+    </main>
   );
-  function RestOfPageContent() {
-    return (
-      <section
-        className="
-        relative -mt-10
-        py-24 text-center overflow-hidden
-        rounded-t-[32px]
-        border-t-[6px] border-b-[6px]
-        border-gray-300
-        shadow-[0_-18px_40px_rgba(0,0,0,0.85)]
-      "
-      >
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=2000&q=80)',
-          }}
-        />
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/60" />
-
-        {/* Top fade only */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black via-black/40 to-transparent" />
-
-        <div className="max-w-4xl mx-auto px-4 relative z-10">
-          <p className="text-2xl text-white mb-6 font-semibold">
-            Represent a college or scholarship?
-          </p>
-
-          <Link href="/contact">
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto bg-white !text-black hover:bg-gray-100 shadow-xl hover:scale-105 transition-all"
-            >
-              List Your Institution
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-    );
-  }
 }
