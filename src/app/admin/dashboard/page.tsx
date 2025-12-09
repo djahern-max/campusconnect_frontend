@@ -733,6 +733,12 @@ export default function AdminDashboard() {
           <div className="space-y-2 text-sm text-gray-600">
             <p><strong>Account Type:</strong> Institution Admin</p>
             <p><strong>Email:</strong> {user?.email}</p>
+            {data && (
+              <>
+                <p><strong>Institution:</strong> {data.name}</p>
+                <p><strong>IPEDS ID:</strong> {data.ipeds_id}</p>
+              </>
+            )}
             <p><strong>Status:</strong> <span className="text-green-600">Active</span></p>
           </div>
         </div>
