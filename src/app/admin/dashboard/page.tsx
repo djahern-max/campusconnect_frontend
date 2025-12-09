@@ -1,12 +1,10 @@
-//src/app/admin/dashboard/page.tsx
 'use client';
 
 /**
- * COMPLETE Admin Dashboard - ALL 42 Institution Fields
- * Organized sections: Read-Only Info, Basic, Academic, Costs, Admissions, Data Quality
+ * FIXED Admin Dashboard - Proper debouncing and number handling
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useInstitutionData } from '@/hooks/useInstitutionData';
@@ -41,11 +39,6 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, description, icon, href,
     accent: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
     warning: 'bg-amber-50 text-amber-600 hover:bg-amber-100',
   };
-
-
-
-
-
 
   return (
     <button
@@ -93,8 +86,6 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       setShowSaved(true);
     }
   }, [saving, showSaved]);
-
-
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
@@ -144,76 +135,111 @@ export default function AdminDashboard() {
   const institutionId = user?.entity_type === 'institution' ? user.entity_id : null;
   const { data, loading: dataLoading, error: dataError, updateField, saving } = useInstitutionData(institutionId);
 
-  // Local state for formatted values
-  const [formattedValues, setFormattedValues] = useState<Record<string, string>>({});
-  const [fieldTimeouts, setFieldTimeouts] = useState<Record<string, NodeJS.Timeout>>({});
-  const [studentFacultyRatio, setStudentFacultyRatio] = useState<string>('');
+  // 🔥 FIX 1: Use refs to track pending updates per field
+  const pendingUpdatesRef = useRef<Record<string, NodeJS.Timeout>>({});
 
-  // Update formatted values when data loads
+  // 🔥 FIX 2: Local state only for display values (what user sees)
+  const [localValues, setLocalValues] = useState<Record<string, string>>({});
+
+  // 🔥 FIX 3: Initialize local values from server data ONCE
   useEffect(() => {
-    if (data) {
-      const formatted: Record<string, string> = {};
-      // Format all numeric cost fields
-      const costFields = [
-        'tuition_in_state', 'tuition_out_of_state', 'tuition_private', 'tuition_in_district',
-        'room_cost', 'board_cost', 'room_and_board',
-        'application_fee_undergrad', 'application_fee_grad'
+    if (data && Object.keys(localValues).length === 0) {
+      const initial: Record<string, string> = {};
+
+      // All the fields we're editing
+      const fields = [
+        'website',
+        'level',
+        'control',
+        'size_category',
+        'locale',
+        'student_faculty_ratio',
+        'tuition_in_state',
+        'tuition_out_of_state',
+        'tuition_private',
+        'tuition_in_district',
+        'room_cost',
+        'board_cost',
+        'room_and_board',
+        'application_fee_undergrad',
+        'application_fee_grad',
+        'acceptance_rate',
+        'sat_reading_25th',
+        'sat_reading_75th',
+        'sat_math_25th',
+        'sat_math_75th',
+        'act_composite_25th',
+        'act_composite_75th',
       ];
 
-      costFields.forEach(field => {
+      fields.forEach(field => {
         const value = (data as any)[field];
-        if (value) {
-          formatted[field] = Number(value).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
+        if (value !== null && value !== undefined) {
+          initial[field] = String(value);
         }
       });
 
-      setFormattedValues(formatted);
-
-      // ✅ ADD THIS: Initialize student-faculty ratio
-      if (data.student_faculty_ratio) {
-        setStudentFacultyRatio(data.student_faculty_ratio.toString());
-      }
+      setLocalValues(initial);
     }
-  }, [data]);
+  }, [data]); // Only depend on data, not localValues
 
-
-
-  const handleFieldChange = (field: string, value: any) => {
+  // 🔥 FIX 4: Debounced update function (called after typing stops)
+  const debouncedUpdate = (field: string, value: any) => {
     // Clear existing timeout for this field
-    if (fieldTimeouts[field]) {
-      clearTimeout(fieldTimeouts[field]);
+    if (pendingUpdatesRef.current[field]) {
+      clearTimeout(pendingUpdatesRef.current[field]);
     }
 
     // Set new timeout
     const timeoutId = setTimeout(() => {
       updateField(field as any, value);
-    }, 500);
+      delete pendingUpdatesRef.current[field];
+    }, 1000); // Increased to 1 second for better stability
 
-    // Store timeout ID
-    setFieldTimeouts(prev => ({ ...prev, [field]: timeoutId }));
+    pendingUpdatesRef.current[field] = timeoutId;
   };
 
-  // Handle number input with formatting
-  const handleNumberInput = (field: string, displayValue: string) => {
-    // Store the formatted display value
-    setFormattedValues(prev => ({ ...prev, [field]: displayValue }));
+  // 🔥 FIX 5: Handle text input (website, dropdowns)
+  const handleTextChange = (field: string, rawValue: string) => {
+    // Update local display immediately
+    setLocalValues(prev => ({ ...prev, [field]: rawValue }));
 
-    // Parse and save the actual number
-    const cleanValue = displayValue.replace(/,/g, '');
-    const numValue = parseFloat(cleanValue);
+    // Send to backend after debounce
+    debouncedUpdate(field, rawValue || null);
+  };
 
-    if (!isNaN(numValue)) {
-      handleFieldChange(field, numValue);
-    } else if (displayValue === '') {
-      handleFieldChange(field, null);
+  // 🔥 FIX 6: Handle number input (currency, percentages, SAT/ACT scores)
+  const handleNumberChange = (field: string, rawValue: string, isDecimal: boolean = true) => {
+    // Update local display immediately (keep what user typed)
+    setLocalValues(prev => ({ ...prev, [field]: rawValue }));
+
+    // Parse and validate
+    if (rawValue === '' || rawValue === null) {
+      debouncedUpdate(field, null);
+      return;
+    }
+
+    // Remove commas for parsing
+    const cleanValue = rawValue.replace(/,/g, '');
+
+    if (isDecimal) {
+      const numValue = parseFloat(cleanValue);
+      if (!isNaN(numValue) && numValue >= 0) {
+        debouncedUpdate(field, numValue);
+      }
+    } else {
+      const intValue = parseInt(cleanValue);
+      if (!isNaN(intValue) && intValue >= 0) {
+        debouncedUpdate(field, intValue);
+      }
     }
   };
 
-  // Format on blur
-  const handleNumberBlur = (field: string, value: string) => {
+  // 🔥 FIX 7: Format currency on blur (optional - for better UX)
+  const formatCurrency = (field: string) => {
+    const value = localValues[field];
+    if (!value) return;
+
     const cleanValue = value.replace(/,/g, '');
     const numValue = parseFloat(cleanValue);
 
@@ -222,19 +248,16 @@ export default function AdminDashboard() {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
-      setFormattedValues(prev => ({ ...prev, [field]: formatted }));
-    } else {
-      setFormattedValues(prev => ({ ...prev, [field]: '' }));
+      setLocalValues(prev => ({ ...prev, [field]: formatted }));
     }
   };
 
-  // Remove formatting on focus
-  const handleNumberFocus = (field: string, e: React.FocusEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
-    setFormattedValues(prev => ({ ...prev, [field]: value }));
-    // Select all text for easy editing
-    e.target.select();
-  };
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(pendingUpdatesRef.current).forEach(timeout => clearTimeout(timeout));
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -325,10 +348,6 @@ export default function AdminDashboard() {
                       <span className="ml-2 text-gray-600">{data.control_type}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">Data Completeness Score:</span>
-                      <span className="ml-2 text-gray-600">{data.data_completeness_score}%</span>
-                    </div>
-                    <div>
                       <span className="font-medium text-gray-700">Completeness Score:</span>
                       <span className="ml-2 text-gray-600">{data.data_completeness_score}%</span>
                     </div>
@@ -359,8 +378,8 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
                       <input
                         type="url"
-                        value={data.website || ''}
-                        onChange={(e) => handleFieldChange('website', e.target.value || null)}
+                        value={localValues.website || ''}
+                        onChange={(e) => handleTextChange('website', e.target.value)}
                         placeholder="https://www.example.edu"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
@@ -375,8 +394,8 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
                       <select
-                        value={data.level?.toString() || ''}
-                        onChange={(e) => handleFieldChange('level', e.target.value ? parseInt(e.target.value) : null)}
+                        value={localValues.level || ''}
+                        onChange={(e) => handleTextChange('level', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select level</option>
@@ -388,8 +407,8 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Control</label>
                       <select
-                        value={data.control?.toString() || ''}
-                        onChange={(e) => handleFieldChange('control', e.target.value ? parseInt(e.target.value) : null)}
+                        value={localValues.control || ''}
+                        onChange={(e) => handleTextChange('control', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select control</option>
@@ -401,8 +420,8 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Size Category</label>
                       <select
-                        value={data.size_category || ''}
-                        onChange={(e) => handleFieldChange('size_category', e.target.value || null)}
+                        value={localValues.size_category || ''}
+                        onChange={(e) => handleTextChange('size_category', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select size</option>
@@ -415,8 +434,8 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Locale</label>
                       <select
-                        value={data.locale || ''}
-                        onChange={(e) => handleFieldChange('locale', e.target.value || null)}
+                        value={localValues.locale || ''}
+                        onChange={(e) => handleTextChange('locale', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select locale</option>
@@ -426,25 +445,20 @@ export default function AdminDashboard() {
                         <option value="rural">Rural</option>
                       </select>
                     </div>
-
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Student-Faculty Ratio</label>
                       <input
-                        type="number"
-                        step="0.01"
-                        value={data.student_faculty_ratio || ''}
-                        onChange={(e) => handleFieldChange('student_faculty_ratio', e.target.value ? parseFloat(e.target.value) : null)}
-                        placeholder="15.00"
+                        type="text"
+                        value={localValues.student_faculty_ratio || ''}
+                        onChange={(e) => handleNumberChange('student_faculty_ratio', e.target.value, true)}
+                        placeholder="15.0"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
-
-
                   </div>
                 </div>
 
-                {/* COSTS & TUITION - ALL 9 FIELDS */}
+                {/* COSTS & TUITION */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Costs & Tuition</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -454,10 +468,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.tuition_in_state || ''}
-                          onChange={(e) => handleNumberInput('tuition_in_state', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('tuition_in_state', e)}
-                          onBlur={(e) => handleNumberBlur('tuition_in_state', e.target.value)}
+                          value={localValues.tuition_in_state || ''}
+                          onChange={(e) => handleNumberChange('tuition_in_state', e.target.value)}
+                          onBlur={() => formatCurrency('tuition_in_state')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -469,10 +482,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.tuition_out_of_state || ''}
-                          onChange={(e) => handleNumberInput('tuition_out_of_state', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('tuition_out_of_state', e)}
-                          onBlur={(e) => handleNumberBlur('tuition_out_of_state', e.target.value)}
+                          value={localValues.tuition_out_of_state || ''}
+                          onChange={(e) => handleNumberChange('tuition_out_of_state', e.target.value)}
+                          onBlur={() => formatCurrency('tuition_out_of_state')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -484,10 +496,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.tuition_private || ''}
-                          onChange={(e) => handleNumberInput('tuition_private', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('tuition_private', e)}
-                          onBlur={(e) => handleNumberBlur('tuition_private', e.target.value)}
+                          value={localValues.tuition_private || ''}
+                          onChange={(e) => handleNumberChange('tuition_private', e.target.value)}
+                          onBlur={() => formatCurrency('tuition_private')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -499,10 +510,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.tuition_in_district || ''}
-                          onChange={(e) => handleNumberInput('tuition_in_district', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('tuition_in_district', e)}
-                          onBlur={(e) => handleNumberBlur('tuition_in_district', e.target.value)}
+                          value={localValues.tuition_in_district || ''}
+                          onChange={(e) => handleNumberChange('tuition_in_district', e.target.value)}
+                          onBlur={() => formatCurrency('tuition_in_district')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -514,10 +524,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.room_cost || ''}
-                          onChange={(e) => handleNumberInput('room_cost', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('room_cost', e)}
-                          onBlur={(e) => handleNumberBlur('room_cost', e.target.value)}
+                          value={localValues.room_cost || ''}
+                          onChange={(e) => handleNumberChange('room_cost', e.target.value)}
+                          onBlur={() => formatCurrency('room_cost')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -529,10 +538,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.board_cost || ''}
-                          onChange={(e) => handleNumberInput('board_cost', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('board_cost', e)}
-                          onBlur={(e) => handleNumberBlur('board_cost', e.target.value)}
+                          value={localValues.board_cost || ''}
+                          onChange={(e) => handleNumberChange('board_cost', e.target.value)}
+                          onBlur={() => formatCurrency('board_cost')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -544,10 +552,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.room_and_board || ''}
-                          onChange={(e) => handleNumberInput('room_and_board', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('room_and_board', e)}
-                          onBlur={(e) => handleNumberBlur('room_and_board', e.target.value)}
+                          value={localValues.room_and_board || ''}
+                          onChange={(e) => handleNumberChange('room_and_board', e.target.value)}
+                          onBlur={() => formatCurrency('room_and_board')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -559,10 +566,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.application_fee_undergrad || ''}
-                          onChange={(e) => handleNumberInput('application_fee_undergrad', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('application_fee_undergrad', e)}
-                          onBlur={(e) => handleNumberBlur('application_fee_undergrad', e.target.value)}
+                          value={localValues.application_fee_undergrad || ''}
+                          onChange={(e) => handleNumberChange('application_fee_undergrad', e.target.value)}
+                          onBlur={() => formatCurrency('application_fee_undergrad')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -574,10 +580,9 @@ export default function AdminDashboard() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="text"
-                          value={formattedValues.application_fee_grad || ''}
-                          onChange={(e) => handleNumberInput('application_fee_grad', e.target.value)}
-                          onFocus={(e) => handleNumberFocus('application_fee_grad', e)}
-                          onBlur={(e) => handleNumberBlur('application_fee_grad', e.target.value)}
+                          value={localValues.application_fee_grad || ''}
+                          onChange={(e) => handleNumberChange('application_fee_grad', e.target.value)}
+                          onBlur={() => formatCurrency('application_fee_grad')}
                           placeholder="0.00"
                           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -586,7 +591,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* ADMISSIONS - ALL 7 FIELDS */}
+                {/* ADMISSIONS STATISTICS */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Admissions Statistics</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -594,10 +599,9 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Acceptance Rate (%)</label>
                       <div className="relative">
                         <input
-                          type="number"
-                          step="0.01"
-                          value={data.acceptance_rate || ''}
-                          onChange={(e) => handleFieldChange('acceptance_rate', e.target.value ? parseFloat(e.target.value) : null)}
+                          type="text"
+                          value={localValues.acceptance_rate || ''}
+                          onChange={(e) => handleNumberChange('acceptance_rate', e.target.value)}
                           placeholder="0.00"
                           className="w-full pr-7 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
@@ -605,68 +609,67 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (25th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (25th)</label>
                       <input
-                        type="number"
-                        value={data.sat_reading_25th || ''}
-                        onChange={(e) => handleFieldChange('sat_reading_25th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.sat_reading_25th || ''}
+                        onChange={(e) => handleNumberChange('sat_reading_25th', e.target.value, false)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (75th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Reading (75th)</label>
                       <input
-                        type="number"
-                        value={data.sat_reading_75th || ''}
-                        onChange={(e) => handleFieldChange('sat_reading_75th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.sat_reading_75th || ''}
+                        onChange={(e) => handleNumberChange('sat_reading_75th', e.target.value, false)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (25th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (25th)</label>
                       <input
-                        type="number"
-                        value={data.sat_math_25th || ''}
-                        onChange={(e) => handleFieldChange('sat_math_25th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.sat_math_25th || ''}
+                        onChange={(e) => handleNumberChange('sat_math_25th', e.target.value, false)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (75th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SAT Math (75th)</label>
                       <input
-                        type="number"
-                        value={data.sat_math_75th || ''}
-                        onChange={(e) => handleFieldChange('sat_math_75th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.sat_math_75th || ''}
+                        onChange={(e) => handleNumberChange('sat_math_75th', e.target.value, false)}
                         placeholder="200-800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (25th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (25th)</label>
                       <input
-                        type="number"
-                        value={data.act_composite_25th || ''}
-                        onChange={(e) => handleFieldChange('act_composite_25th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.act_composite_25th || ''}
+                        onChange={(e) => handleNumberChange('act_composite_25th', e.target.value, false)}
                         placeholder="1-36"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (75th Percentile)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ACT Composite (75th)</label>
                       <input
-                        type="number"
-                        value={data.act_composite_75th || ''}
-                        onChange={(e) => handleFieldChange('act_composite_75th', e.target.value ? parseInt(e.target.value) : null)}
+                        type="text"
+                        value={localValues.act_composite_75th || ''}
+                        onChange={(e) => handleNumberChange('act_composite_75th', e.target.value, false)}
                         placeholder="1-36"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                   </div>
                 </div>
-
 
               </div>
             </CollapsibleSection>
