@@ -15,7 +15,8 @@ import {
   GraduationCap,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
+  Shield
 } from 'lucide-react';
 import { use } from 'react';
 import { publicGalleryApi, GalleryImage } from '@/api/endpoints/publicGallery';
@@ -248,12 +249,20 @@ export default function InstitutionDetailPage({
         )}
 
         {/* Quick Info Bar */}
+
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <p className="text-sm font-medium text-gray-500 mb-1">Institution Type</p>
-              <p className="text-lg font-semibold text-gray-900 capitalize">
+              <p className="text-lg font-semibold text-gray-900 capitalize flex items-center gap-2">
                 {institution.control_type?.replace('_', ' ')}
+                {/* Small verification badge */}
+                {institution.data_source === 'admin' && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                    <CheckCircle className="h-3 w-3" />
+                    Verified
+                  </span>
+                )}
               </p>
             </div>
             {institution.website ? (
@@ -291,6 +300,41 @@ export default function InstitutionDetailPage({
             )}
           </div>
         </div>
+
+
+
+
+        {/* Admin Verified Badge - Shows when institution has verified their data */}
+        {institution.data_source === 'admin' && (
+          <div className="mb-8">
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <Shield className="h-8 w-8 text-green-600" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-bold text-green-900">Verified by Institution</h3>
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <p className="text-sm text-green-800">
+                    This institution has verified that their data is current and accurate for the{' '}
+                    <span className="font-semibold">{institution.ipeds_year || 'current academic year'}</span>.
+                  </p>
+                  <p className="text-xs text-green-700 mt-2">
+                    Last verified: {new Date(institution.data_last_updated).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Column */}

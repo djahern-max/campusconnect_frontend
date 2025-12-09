@@ -14,6 +14,16 @@ export interface InstitutionDataQuality {
     has_tuition_data: boolean;
     has_room_board: boolean;
     has_admissions_data: boolean;
+    image_count: number;
+    has_images: boolean;
+    score_breakdown: {
+        core_identity: number;
+        cost_data: number;
+        room_board: number;
+        admissions: number;
+        images: number;
+        admin_verified: number;
+    };
 }
 
 export interface InstitutionBasicInfoUpdate {

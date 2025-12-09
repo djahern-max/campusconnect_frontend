@@ -1,4 +1,5 @@
 // src/app/admin/edit-data/page.tsx
+// src/app/admin/edit-data/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ import { useInstitutionDataQuality } from '@/hooks/useInstitutionData';
 import { institutionDataApi } from '@/api/endpoints/institutionDataAPI';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
 import {
     Building,
     DollarSign,
@@ -16,6 +18,7 @@ import {
     CheckCircle,
     Info,
     Save,
+    ArrowLeft,
 } from 'lucide-react';
 
 type TabType = 'basic' | 'costs' | 'admissions';
@@ -75,7 +78,6 @@ export default function EditDataPage() {
         if (!institutionId) return;
 
         try {
-            // ✅ Remove institutionId parameter
             const data = await institutionDataApi.getInstitutionData(institutionId);
 
             // Populate basic info
@@ -125,7 +127,6 @@ export default function EditDataPage() {
             }
             if (basicInfo.size_category) updateData.size_category = basicInfo.size_category;
 
-            // ✅ Remove institutionId parameter
             await institutionDataApi.updateBasicInfo(institutionId, updateData);
 
             setSuccessMessage('Basic information updated successfully!');
@@ -166,7 +167,6 @@ export default function EditDataPage() {
                 updateData.application_fee_undergrad = parseFloat(costData.application_fee_undergrad);
             }
 
-            // ✅ Remove institutionId parameter
             await institutionDataApi.updateCostData(institutionId, updateData);
 
             setSuccessMessage('Cost data updated successfully!');
@@ -213,7 +213,6 @@ export default function EditDataPage() {
                 updateData.act_composite_75th = parseInt(admissionsData.act_composite_75th);
             }
 
-            // ✅ Remove institutionId parameter
             await institutionDataApi.updateAdmissionsData(institutionId, updateData);
 
             setSuccessMessage('Admissions data updated successfully!');
@@ -253,6 +252,15 @@ export default function EditDataPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="py-8">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Back to Dashboard Link */}
+                    <Link
+                        href="/admin/dashboard"
+                        className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Dashboard
+                    </Link>
+
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Institution Data</h1>
@@ -351,8 +359,6 @@ export default function EditDataPage() {
         </div>
     );
 }
-
-// Update all three tab components to use this structure
 
 // Basic Info Tab Component
 function BasicInfoTab({
