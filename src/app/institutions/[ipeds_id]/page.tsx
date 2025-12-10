@@ -304,37 +304,7 @@ export default function InstitutionDetailPage({
 
 
 
-        {/* Admin Verified Badge - Shows when institution has verified their data */}
-        {institution.data_source === 'admin' && (
-          <div className="mb-8">
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <Shield className="h-8 w-8 text-green-600" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-bold text-green-900">Verified by Institution</h3>
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  </div>
-                  <p className="text-sm text-green-800">
-                    This institution has verified that their data is current and accurate for the{' '}
-                    <span className="font-semibold">{institution.ipeds_year || 'current academic year'}</span>.
-                  </p>
-                  <p className="text-xs text-green-700 mt-2">
-                    Last verified: {new Date(institution.data_last_updated).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Column */}
@@ -631,6 +601,7 @@ export default function InstitutionDetailPage({
             )}
           </div>
         </div>
+
 
         {/* Call to Action for Institution Admins */}
         {needsImprovement && (
