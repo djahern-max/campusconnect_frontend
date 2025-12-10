@@ -1,11 +1,9 @@
 // src/app/scholarships/page.tsx
-// src/app/scholarships/page.tsx
-// src/app/scholarships/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Filter, X, Loader2 } from 'lucide-react';
+import { Search, Filter, X, Loader2, DollarSign, Calendar, Users } from 'lucide-react';
 import scholarshipsApi from '@/api/endpoints/scholarships';
 import { Scholarship } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -67,15 +65,11 @@ export default function ScholarshipsPage() {
       setLoading(true);
       setError(null);
 
-      console.log('Fetching scholarships:', { page: currentPage, limit: ITEMS_PER_PAGE, scholarship_type: selectedType });
-
       const data: ScholarshipListResponse = await scholarshipsApi.getAll({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         ...(selectedType && { scholarship_type: selectedType })
       });
-
-      console.log('API Response:', data);
 
       setScholarships(data.scholarships);
       setTotalCount(data.total);
@@ -106,7 +100,6 @@ export default function ScholarshipsPage() {
 
   const handleLoadMore = () => {
     if (displayedCount < filteredScholarships.length) {
-      // Still have items to display from current data
       setIsLoadingMore(true);
       setTimeout(() => {
         const newCount = displayedCount + ITEMS_PER_PAGE;
@@ -114,7 +107,6 @@ export default function ScholarshipsPage() {
         setIsLoadingMore(false);
       }, 300);
     } else if (hasMore) {
-      // Need to fetch next page from API
       setCurrentPage(prev => prev + 1);
     }
   };
@@ -168,7 +160,6 @@ export default function ScholarshipsPage() {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          {/* Search Bar */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
@@ -180,7 +171,6 @@ export default function ScholarshipsPage() {
             />
           </div>
 
-          {/* Filter Toggle */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -206,7 +196,6 @@ export default function ScholarshipsPage() {
             )}
           </div>
 
-          {/* Filter Options */}
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Scholarship Type</h3>
@@ -216,7 +205,7 @@ export default function ScholarshipsPage() {
                     key={type}
                     onClick={() => {
                       setSelectedType(selectedType === type ? '' : type);
-                      setCurrentPage(1); // Reset to page 1 when filter changes
+                      setCurrentPage(1);
                     }}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedType === type
                       ? 'bg-primary-600 text-white'
@@ -269,6 +258,51 @@ export default function ScholarshipsPage() {
                   {searchTerm && ` matching "${searchTerm}"`}
                 </div>
 
+                {/* Scholarship Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {displayedScholarships.map(scholarship => (
+                    <div
+                      key={scholarship.id}
+                      onClick={() => handleScholarshipClick(scholarship.id)}
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                        {scholarship.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4">{scholarship.organization}</p>
+
+                      {scholarship.description && (
+                        <p className="text-gray-700 mb-4 line-clamp-3">{scholarship.description}</p>
+                      )}
+
+                      <div className="space-y-2">
+                        {(scholarship.amount_min || scholarship.amount_max) && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <DollarSign className="h-4 w-4 mr-2 text-primary-600" />
+                            <span>
+                              {scholarship.amount_min && scholarship.amount_max && scholarship.amount_min !== scholarship.amount_max
+                                ? `$${scholarship.amount_min.toLocaleString()} - $${scholarship.amount_max.toLocaleString()}`
+                                : `$${(scholarship.amount_max || scholarship.amount_min).toLocaleString()}`
+                              }
+                            </span>
+                          </div>
+                        )}
+                        {scholarship.deadline && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Calendar className="h-4 w-4 mr-2 text-primary-600" />
+                            <span>Due: {new Date(scholarship.deadline).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                        {scholarship.scholarship_type && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Users className="h-4 w-4 mr-2 text-primary-600" />
+                            <span>{formatType(scholarship.scholarship_type)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
                 {/* Load More Button */}
                 {canLoadMore && (
