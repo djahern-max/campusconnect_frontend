@@ -268,6 +268,12 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, router]);
 
+  useEffect(() => {
+    if (user?.entity_type === 'scholarship') {
+      router.push('/admin/scholarship-profile');
+    }
+  }, [user, router]);
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -743,9 +749,16 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Info</h3>
           <div className="space-y-2 text-sm text-gray-600">
-            <p><strong>Account Type:</strong> Institution Admin</p>
+            <p>
+              <strong>Account Type:</strong>{' '}
+              {user?.entity_type === 'institution'
+                ? 'Institution Admin'
+                : user?.entity_type === 'scholarship'
+                  ? 'Scholarship Admin'
+                  : 'Admin'}
+            </p>
             <p><strong>Email:</strong> {user?.email}</p>
-            {data && (
+            {data && isInstitutionAdmin && (
               <>
                 <p><strong>Institution:</strong> {data.name}</p>
                 <p><strong>IPEDS ID:</strong> {data.ipeds_id}</p>
